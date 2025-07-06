@@ -28,12 +28,14 @@ import {
   TestTube,
   Shield,
   Activity,
-  AlertCircle
+  AlertCircle,
+  Bell
 } from "lucide-react"
 import { getPendingCompanyApprovals, updateCompanyApprovalStatus, getAllCompaniesNeedingApproval } from "@/lib/firebase"
 import { useToast } from "@/hooks/use-toast"
 import { doc, getDoc, updateDoc, collection, getDocs, query, where, addDoc, orderBy, deleteDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { AutomatedNotificationService } from "@/lib/automated-notifications"
 
 interface CompanyApproval {
   id: string
@@ -180,7 +182,18 @@ export default function AdminApprovalsPage() {
 
   const handleApprove = async (id: string) => {
     try {
+      // Get company details before updating
+      const companyDoc = await getDoc(doc(db, "companies", id))
+      const companyData = companyDoc.data()
+      
       await updateCompanyApprovalStatus(id, 'approved')
+      
+      // Trigger notification for company approval
+      if (companyData) {
+        const notificationService = AutomatedNotificationService.getInstance()
+        await notificationService.triggerCompanyApproved(companyData.userId || id, companyData.companyName)
+      }
+      
       toast({
         title: "Company Approved",
         description: "The company has been successfully approved.",
@@ -199,7 +212,18 @@ export default function AdminApprovalsPage() {
 
   const handleReject = async (id: string) => {
     try {
+      // Get company details before updating
+      const companyDoc = await getDoc(doc(db, "companies", id))
+      const companyData = companyDoc.data()
+      
       await updateCompanyApprovalStatus(id, 'rejected')
+      
+      // Trigger notification for company rejection
+      if (companyData) {
+        const notificationService = AutomatedNotificationService.getInstance()
+        await notificationService.triggerCompanyRejected(companyData.userId || id, companyData.companyName)
+      }
+      
       toast({
         title: "Company Rejected",
         description: "The company has been rejected.",
@@ -834,6 +858,37 @@ export default function AdminApprovalsPage() {
     })
   }
 
+  const testNotificationSystem = async () => {
+    try {
+      const notificationService = AutomatedNotificationService.getInstance()
+      
+      // Test different types of notifications
+      await notificationService.triggerNewPendingApproval(
+        'test-admin-id',
+        'Test Company',
+        'test@example.com'
+      )
+      
+      await notificationService.triggerSystemAlert(
+        'test-admin-id',
+        'Test Alert',
+        'This is a test system alert to verify the notification system is working.'
+      )
+      
+      toast({
+        title: "Test Notifications Sent",
+        description: "Test notifications have been created. Check your notification bell!",
+      })
+    } catch (error) {
+      console.error("Error testing notification system:", error)
+      toast({
+        title: "Test Failed",
+        description: "Failed to send test notifications.",
+        variant: "destructive",
+      })
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -1417,6 +1472,10 @@ export default function AdminApprovalsPage() {
                   <Button onClick={showErrorLogs} size="sm" variant="outline">
                     <AlertCircle className="w-4 h-4 mr-1" />
                     Error Logs
+                  </Button>
+                  <Button onClick={testNotificationSystem} size="sm" variant="outline">
+                    <Bell className="w-4 h-4 mr-1" />
+                    Test Notifications
                   </Button>
                 </div>
               </div>

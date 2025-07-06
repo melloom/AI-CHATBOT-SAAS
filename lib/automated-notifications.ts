@@ -23,6 +23,11 @@ export class AutomatedNotificationService {
     this.enabledNotifications.add('chatbot-deployed')
     this.enabledNotifications.add('chatbot-error')
     this.enabledNotifications.add('welcome-new-user')
+    this.enabledNotifications.add('new-pending-approval')
+    this.enabledNotifications.add('company-approved')
+    this.enabledNotifications.add('company-rejected')
+    this.enabledNotifications.add('new-user-registration')
+    this.enabledNotifications.add('system-alert')
   }
 
   static getInstance(): AutomatedNotificationService {
@@ -200,6 +205,119 @@ export class AutomatedNotificationService {
       console.log(`Automated notification sent: welcome-new-user to user ${userId}`)
     } catch (error) {
       console.error('Failed to send welcome notification:', error)
+    }
+  }
+
+  async triggerNewPendingApproval(adminUserId: string, companyName: string, companyEmail: string): Promise<void> {
+    if (!this.isNotificationEnabled('new-pending-approval')) return
+
+    try {
+      await notificationService.createNotificationForUser(adminUserId, {
+        title: 'New Company Approval Request',
+        message: `${companyName} (${companyEmail}) has submitted an approval request and is waiting for review.`,
+        type: 'info',
+        actionUrl: '/dashboard/admin/approvals',
+        actionText: 'Review Now',
+        metadata: {
+          automated: true,
+          trigger: 'new_pending_approval',
+          companyName,
+          companyEmail
+        }
+      })
+      console.log(`Automated notification sent: new-pending-approval to admin ${adminUserId}`)
+    } catch (error) {
+      console.error('Failed to send new pending approval notification:', error)
+    }
+  }
+
+  async triggerCompanyApproved(companyUserId: string, companyName: string): Promise<void> {
+    if (!this.isNotificationEnabled('company-approved')) return
+
+    try {
+      await notificationService.createNotificationForUser(companyUserId, {
+        title: 'Company Approved!',
+        message: `Congratulations! Your company "${companyName}" has been approved. You can now access all features.`,
+        type: 'success',
+        actionUrl: '/dashboard',
+        actionText: 'Go to Dashboard',
+        metadata: {
+          automated: true,
+          trigger: 'company_approved',
+          companyName
+        }
+      })
+      console.log(`Automated notification sent: company-approved to user ${companyUserId}`)
+    } catch (error) {
+      console.error('Failed to send company approved notification:', error)
+    }
+  }
+
+  async triggerCompanyRejected(companyUserId: string, companyName: string, reason?: string): Promise<void> {
+    if (!this.isNotificationEnabled('company-rejected')) return
+
+    try {
+      await notificationService.createNotificationForUser(companyUserId, {
+        title: 'Company Application Status',
+        message: `Your company "${companyName}" application has been reviewed. ${reason ? `Reason: ${reason}` : 'Please contact support for more information.'}`,
+        type: 'warning',
+        actionUrl: '/contact',
+        actionText: 'Contact Support',
+        metadata: {
+          automated: true,
+          trigger: 'company_rejected',
+          companyName,
+          reason
+        }
+      })
+      console.log(`Automated notification sent: company-rejected to user ${companyUserId}`)
+    } catch (error) {
+      console.error('Failed to send company rejected notification:', error)
+    }
+  }
+
+  async triggerNewUserRegistration(adminUserId: string, userEmail: string, companyName: string): Promise<void> {
+    if (!this.isNotificationEnabled('new-user-registration')) return
+
+    try {
+      await notificationService.createNotificationForUser(adminUserId, {
+        title: 'New User Registration',
+        message: `A new user (${userEmail}) has registered for company "${companyName}".`,
+        type: 'info',
+        actionUrl: '/dashboard/admin/users',
+        actionText: 'View Users',
+        metadata: {
+          automated: true,
+          trigger: 'new_user_registration',
+          userEmail,
+          companyName
+        }
+      })
+      console.log(`Automated notification sent: new-user-registration to admin ${adminUserId}`)
+    } catch (error) {
+      console.error('Failed to send new user registration notification:', error)
+    }
+  }
+
+  async triggerSystemAlert(adminUserId: string, alertType: string, message: string): Promise<void> {
+    if (!this.isNotificationEnabled('system-alert')) return
+
+    try {
+      await notificationService.createNotificationForUser(adminUserId, {
+        title: `System Alert: ${alertType}`,
+        message: message,
+        type: 'warning',
+        actionUrl: '/dashboard/admin/settings',
+        actionText: 'View Settings',
+        metadata: {
+          automated: true,
+          trigger: 'system_alert',
+          alertType
+        }
+      })
+      console.log(`Automated notification sent: system-alert to admin ${adminUserId}`)
+    } catch (error) {
+      console.error('Failed to send system alert notification:', error)
     }
   }
 

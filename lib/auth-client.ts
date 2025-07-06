@@ -7,8 +7,9 @@ import {
   User,
   OAuthProvider
 } from "firebase/auth"
-import { doc, setDoc, getDoc, addDoc, collection } from "firebase/firestore"
+import { doc, setDoc, getDoc, addDoc, collection, getDocs } from "firebase/firestore"
 import { auth, db } from "./firebase"
+import { AutomatedNotificationService } from "./automated-notifications"
 
 // Helper function to get current user's ID token for API calls
 export const getAuthToken = async (): Promise<string | null> => {
@@ -91,6 +92,27 @@ export const createUserWithEmailAndPassword = async (email: string, password: st
         companyId: companyRef.id,
         companyName: defaultCompanyName
       })
+
+      // Trigger notification for new pending approval
+      try {
+        const notificationService = AutomatedNotificationService.getInstance()
+        // Get all admin users to notify them
+        const adminUsersQuery = await getDocs(collection(db, "users"))
+        const adminUsers = adminUsersQuery.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter((user: any) => user.isAdmin === true)
+        
+        // Send notification to all admin users
+        for (const adminUser of adminUsers) {
+          await notificationService.triggerNewPendingApproval(
+            adminUser.id,
+            defaultCompanyName,
+            email
+          )
+        }
+      } catch (error) {
+        console.error("Failed to send pending approval notification:", error)
+      }
     }
     
     return result
@@ -171,6 +193,27 @@ export const signInWithMicrosoft = async () => {
         companyId: companyRef.id,
         companyName: defaultCompanyName
       })
+
+      // Trigger notification for new pending approval
+      try {
+        const notificationService = AutomatedNotificationService.getInstance()
+        // Get all admin users to notify them
+        const adminUsersQuery = await getDocs(collection(db, "users"))
+        const adminUsers = adminUsersQuery.docs
+          .map((doc: any) => ({ id: doc.id, ...doc.data() }))
+          .filter((user: any) => user.isAdmin === true)
+        
+        // Send notification to all admin users
+        for (const adminUser of adminUsers) {
+          await notificationService.triggerNewPendingApproval(
+            adminUser.id,
+            defaultCompanyName,
+            result.user.email || ''
+          )
+        }
+      } catch (error) {
+        console.error("Failed to send pending approval notification:", error)
+      }
     }
     
     return result;
