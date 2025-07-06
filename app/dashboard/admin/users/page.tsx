@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
@@ -15,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useUsers } from "@/hooks/use-users"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/use-auth"
+import { collection, getDoc, doc, addDoc } from "firebase/firestore"
+import { db } from "@/lib/firebase"
 import { ReadOnlyIndicator } from "@/components/ui/read-only-indicator"
 import { 
   Crown, 
@@ -85,6 +87,9 @@ export default function AdminUsersPage() {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deletingUser, setDeletingUser] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
   const [createUserForm, setCreateUserForm] = useState({
     email: '',
     displayName: '',
@@ -185,6 +190,58 @@ export default function AdminUsersPage() {
       }
     } catch (error) {
               console.error('User action failed:', { action, userId, error })
+    }
+  }
+
+  const handleDeleteUser = async (user: User) => {
+    setUserToDelete(user)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return
+
+    setDeletingUser(true)
+    try {
+      console.log(`Deleting user: ${userToDelete.email} (${userToDelete.id})`)
+
+      // Create backup before deletion
+      const userDoc = await getDoc(doc(db, "users", userToDelete.id))
+      if (userDoc.exists()) {
+        const backupData = {
+          ...userDoc.data(),
+          deletedAt: new Date().toISOString(),
+          deletedBy: "admin"
+        }
+        
+        // Store backup in a separate collection
+        await addDoc(collection(db, "deleted_users"), backupData)
+        console.log("User backup created before deletion")
+      }
+
+      // Delete the user
+      await deleteUser(userToDelete.id)
+      console.log("User deleted successfully")
+
+      // Close dialog and reset state
+      setShowDeleteDialog(false)
+      setUserToDelete(null)
+      
+      toast({
+        title: "User Deleted",
+        description: `${userToDelete.displayName || userToDelete.email} has been deleted successfully.`,
+        variant: "default"
+      })
+      
+    } catch (error) {
+      console.error("Error deleting user:", error)
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete user. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setDeletingUser(false)
     }
   }
 
@@ -830,7 +887,7 @@ export default function AdminUsersPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleUserAction('delete', user.id)}
+                              onClick={() => handleDeleteUser(user)}
                               disabled={isReadOnly}
                               title={isReadOnly ? "Read-only mode: Cannot delete users" : ""}
                             >
@@ -1147,6 +1204,87 @@ export default function AdminUsersPage() {
               <p>Role should be either "user" or "admin"</p>
             </div>
       </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete User Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              <span>Delete User</span>
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this user? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {userToDelete && (
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={userToDelete.photoURL} />
+                    <AvatarFallback className="bg-red-100 text-red-600">
+                      {userToDelete.displayName?.charAt(0) || userToDelete.email.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h4 className="font-semibold text-red-800">{userToDelete.displayName || 'No Name'}</h4>
+                    <p className="text-sm text-red-600">{userToDelete.email}</p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      {getRoleBadge(userToDelete.role || 'user')}
+                      {getStatusBadge(userToDelete.approvalStatus || 'pending')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                <p className="mb-2">This will permanently delete:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>User account and profile</li>
+                  <li>All user data and preferences</li>
+                  <li>User's access to the platform</li>
+                  <li>Associated company membership</li>
+                </ul>
+                <p className="mt-2 text-blue-600">
+                  <strong>Note:</strong> A backup will be created before deletion for recovery purposes.
+                </p>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowDeleteDialog(false)
+                setUserToDelete(null)
+              }}
+              disabled={deletingUser}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={confirmDeleteUser}
+              disabled={deletingUser}
+            >
+              {deletingUser ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete User
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

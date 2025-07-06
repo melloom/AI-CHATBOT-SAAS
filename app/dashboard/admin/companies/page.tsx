@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { collection, getDocs, addDoc } from "firebase/firestore"
+import { collection, getDocs, addDoc, doc, deleteDoc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { useRouter } from "next/navigation"
 import { 
@@ -25,7 +25,9 @@ import {
   Plus,
   Navigation,
   Mail,
-  Globe
+  Globe,
+  Trash2,
+  AlertTriangle
 } from "lucide-react"
 import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
 
@@ -47,6 +49,9 @@ export default function CompaniesManagementPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [showAddCompanyDialog, setShowAddCompanyDialog] = useState(false)
   const [addingCompany, setAddingCompany] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deletingCompany, setDeletingCompany] = useState(false)
+  const [companyToDelete, setCompanyToDelete] = useState<Company | null>(null)
   const [newCompany, setNewCompany] = useState({
     companyName: "",
     email: "",
@@ -175,6 +180,52 @@ export default function CompaniesManagementPage() {
       console.error("Error adding company:", error)
     } finally {
       setAddingCompany(false)
+    }
+  }
+
+  const handleDeleteCompany = async (company: Company) => {
+    setCompanyToDelete(company)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDeleteCompany = async () => {
+    if (!companyToDelete) return
+
+    setDeletingCompany(true)
+    try {
+      console.log(`Deleting company: ${companyToDelete.companyName} (${companyToDelete.id})`)
+
+      // Create backup before deletion
+      const companyDoc = await getDoc(doc(db, "companies", companyToDelete.id))
+      if (companyDoc.exists()) {
+        const backupData = {
+          ...companyDoc.data(),
+          deletedAt: new Date().toISOString(),
+          deletedBy: "admin"
+        }
+        
+        // Store backup in a separate collection
+        await addDoc(collection(db, "deleted_companies"), backupData)
+        console.log("Company backup created before deletion")
+      }
+
+      // Delete the company
+      await deleteDoc(doc(db, "companies", companyToDelete.id))
+      console.log("Company deleted successfully")
+
+      // Remove from local state
+      setCompanies(companies.filter(c => c.id !== companyToDelete.id))
+      
+      // Close dialog and reset state
+      setShowDeleteDialog(false)
+      setCompanyToDelete(null)
+      
+      console.log("Company deleted and removed from UI")
+      
+    } catch (error) {
+      console.error("Error deleting company:", error)
+    } finally {
+      setDeletingCompany(false)
     }
   }
 
@@ -402,6 +453,14 @@ export default function CompaniesManagementPage() {
                     >
                       <Navigation className="w-4 h-4" />
                     </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      className="hover:bg-red-600 hover:text-white"
+                      onClick={() => handleDeleteCompany(company)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -515,6 +574,83 @@ export default function CompaniesManagementPage() {
                 <>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Company
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Company Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              <span>Delete Company</span>
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this company? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {companyToDelete && (
+            <div className="space-y-4">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <Building2 className="w-8 h-8 text-red-500" />
+                  <div>
+                    <h4 className="font-semibold text-red-800">{companyToDelete.companyName}</h4>
+                    <p className="text-sm text-red-600">{companyToDelete.email}</p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <Badge variant="outline">{companyToDelete.subscription}</Badge>
+                      <Badge variant={companyToDelete.status === 'active' ? 'default' : 'secondary'}>
+                        {companyToDelete.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                <p className="mb-2">This will permanently delete:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Company profile and settings</li>
+                  <li>All associated chatbots</li>
+                  <li>Company data and configurations</li>
+                </ul>
+                <p className="mt-2 text-blue-600">
+                  <strong>Note:</strong> A backup will be created before deletion for recovery purposes.
+                </p>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowDeleteDialog(false)
+                setCompanyToDelete(null)
+              }}
+              disabled={deletingCompany}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={confirmDeleteCompany}
+              disabled={deletingCompany}
+            >
+              {deletingCompany ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Company
                 </>
               )}
             </Button>
