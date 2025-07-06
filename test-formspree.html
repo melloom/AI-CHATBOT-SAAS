@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formspree Test</title>
+</head>
+<body>
+    <h1>Formspree Test</h1>
+    <form action="https://formspree.io/f/mgvylnze" method="POST">
+        <input type="hidden" name="service_type" value="Test Consultation" />
+        <input type="hidden" name="source" value="Test Form" />
+        <input type="hidden" name="_next" value="https://chathub-ai.vercel.app/web-building/success" />
+        
+        <div>
+            <label>Name:</label>
+            <input type="text" name="name" required>
+        </div>
+        
+        <div>
+            <label>Email:</label>
+            <input type="email" name="email" required>
+        </div>
+        
+        <div>
+            <label>Message:</label>
+            <textarea name="message" rows="4"></textarea>
+        </div>
+        
+        <button type="submit">Submit Test</button>
+    </form>
+</body>
+</html> 

@@ -1,0 +1,19 @@
+# Copy this file to .env.local and fill in your actual Firebase credentials
+# IMPORTANT: Never commit .env.local to version control
+
+# Firebase Admin SDK Configuration
+FIREBASE_PRIVATE_KEY_ID=your_private_key_id_here
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_CONTENT_HERE\n-----END PRIVATE KEY-----\n"
+FIREBASE_CLIENT_EMAIL=your_service_account_email@your-project.iam.gserviceaccount.com
+FIREBASE_CLIENT_ID=your_client_id_here
+FIREBASE_CLIENT_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/your_service_account_email%40your-project.iam.gserviceaccount.com
+
+# Firebase Project Configuration
+FIREBASE_PROJECT_ID=your_project_id_here
+
+# Next.js Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret_here
+
+# Optional: Analytics (if using)
+NEXT_PUBLIC_ANALYTICS_ID=your_analytics_id_here 

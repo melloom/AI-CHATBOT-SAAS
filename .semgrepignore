@@ -1,0 +1,10 @@
+# Ignore false positives that we've already secured
+
+# Path traversal - we've added validation to prevent malicious filenames
+app/api/settings/security-scan/route.ts:593
+
+# RegExp DoS - we've added timeout protection
+app/api/settings/security-scan/route.ts:640
+
+# Prototype pollution - we've added validation to prevent __proto__, constructor, prototype
+components/settings/notification-settings-form.tsx:259 
