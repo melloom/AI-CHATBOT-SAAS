@@ -2,7 +2,7 @@ import {
   signInWithEmailAndPassword as firebaseSignIn,
   createUserWithEmailAndPassword as firebaseCreateUser,
   signInWithPopup,
-  GoogleAuthProvider,
+  OAuthProvider,
   sendPasswordResetEmail as firebaseSendPasswordReset,
   signOut as firebaseSignOut,
   User
@@ -125,27 +125,59 @@ export const createUserWithEmailAndPassword = async (email: string, password: st
   }
 }
 
-export const signInWithGoogle = async () => {
+export const signInWithMicrosoft = async () => {
   try {
-    const provider = new GoogleAuthProvider()
+    const provider = new OAuthProvider('microsoft.com')
     const result = await signInWithPopup(auth, provider)
     
-    // Check if user profile exists, if not create it
+    // Check if user profile exists, if not create it with company
     const userDoc = await getDoc(doc(db, "users", result.user.uid))
     if (!userDoc.exists()) {
+      // Create company for new Microsoft user
+      const defaultCompanyName = `Company for ${result.user.email?.split('@')[0] || 'User'}`
+      
+      const companyRef = await addDoc(collection(db, "companies"), {
+        companyName: defaultCompanyName,
+        email: result.user.email,
+        userId: result.user.uid,
+        approvalStatus: 'pending',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: 'pending',
+        subscription: {
+          plan: 'Free',
+          status: 'pending'
+        }
+      })
+
+      // Create user document with company ID
       await setDoc(doc(db, "users", result.user.uid), {
         email: result.user.email,
         displayName: result.user.displayName,
         photoURL: result.user.photoURL,
+        companyName: defaultCompanyName,
+        companyId: companyRef.id,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         approvalStatus: 'pending',
+        emailVerified: result.user.emailVerified,
+        phoneVerified: false,
+        twoFactorEnabled: false,
+        twoFactorVerified: false,
+        loginAttempts: 0,
+        lastLoginAt: null
+      })
+
+      console.log("Microsoft user and company created successfully:", {
+        userId: result.user.uid,
+        companyId: companyRef.id,
+        companyName: defaultCompanyName
       })
     }
     
     return result
   } catch (error) {
-    console.error("Google sign in error:", error)
+    console.error("Microsoft sign in error:", error)
     throw error
   }
 }

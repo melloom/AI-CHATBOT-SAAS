@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
 import { Check, ChevronDown, Building2 } from "lucide-react"
 import {
   Command,
@@ -58,7 +57,13 @@ export function CompanyAutocomplete({
     setLoading(true)
     try {
       const response = await fetch(
-        `https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(query)}`
+        `https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(query)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+        }
       )
       
       if (response.ok) {
@@ -66,10 +71,12 @@ export function CompanyAutocomplete({
         setCompanies(data)
       } else {
         console.error('Failed to fetch companies:', response.statusText)
+        // Don't show error to user, just allow manual input
         setCompanies([])
       }
     } catch (error) {
       console.error('Error fetching companies:', error)
+      // Don't show error to user, just allow manual input
       setCompanies([])
     } finally {
       setLoading(false)
@@ -110,20 +117,18 @@ export function CompanyAutocomplete({
       <Label htmlFor="company-autocomplete">{label}</Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between"
-          >
-            <div className="flex items-center space-x-2">
-              <Building2 className="h-4 w-4 text-muted-foreground" />
-              <span className={cn("truncate", !value ? "text-muted-foreground" : "text-foreground")}>
-                {value || placeholder}
-              </span>
-            </div>
-            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
+          <div className="relative">
+            <Input
+              id="company-autocomplete"
+              placeholder={placeholder}
+              value={value}
+              onChange={handleInputChange}
+              onFocus={() => setOpen(true)}
+              className="w-full pr-8"
+              required={required}
+            />
+            <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50" />
+          </div>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0" align="start">
           <Command>
@@ -135,7 +140,7 @@ export function CompanyAutocomplete({
             />
             <CommandList>
               <CommandEmpty>
-                {loading ? "Searching..." : "No companies found."}
+                {loading ? "Searching..." : "No companies found. You can type your own company name."}
               </CommandEmpty>
               <CommandGroup>
                 {companies.map((company, index) => (
@@ -168,13 +173,6 @@ export function CompanyAutocomplete({
           </Command>
         </PopoverContent>
       </Popover>
-      {required && (
-        <input
-          type="hidden"
-          value={value}
-          required
-        />
-      )}
     </div>
   )
 } 

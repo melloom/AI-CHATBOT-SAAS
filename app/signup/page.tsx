@@ -11,8 +11,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
-import { createUserWithEmailAndPassword, signInWithGoogle } from "@/lib/auth-client"
-import { Chrome, ArrowLeft } from "lucide-react"
+import { createUserWithEmailAndPassword, signInWithMicrosoft } from "@/lib/auth-client"
+import { Chrome, ArrowLeft, Building2 } from "lucide-react"
 import Image from "next/image"
 import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
 
@@ -37,19 +37,40 @@ export default function SignUpPage() {
       return
     }
 
+    if (password.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setIsLoading(true)
 
     try {
+      console.log("Creating user with email:", email, "company:", companyName)
       await createUserWithEmailAndPassword(email, password, companyName)
       toast({
-        title: "Account created!",
-        description: "Your account has been created and is pending approval.",
+        title: "Account created successfully!",
+        description: "Your account has been created and is pending approval. You'll be notified once approved.",
       })
       router.push("/pending-approval")
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Signup error:", error)
+      let errorMessage = "Failed to create account. Please try again."
+      
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "An account with this email already exists. Please sign in instead."
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = "Password is too weak. Please choose a stronger password."
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = "Please enter a valid email address."
+      }
+      
       toast({
         title: "Sign up failed",
-        description: "Failed to create account. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
@@ -57,18 +78,30 @@ export default function SignUpPage() {
     }
   }
 
-  const handleGoogleSignUp = async () => {
+  const handleMicrosoftSignUp = async () => {
     try {
-      await signInWithGoogle()
+      console.log("Starting Microsoft signup...")
+      await signInWithMicrosoft()
       toast({
         title: "Welcome!",
-        description: "Your account has been created and is pending approval.",
+        description: "Your account has been created and is pending approval. You'll be notified once approved.",
       })
       router.push("/pending-approval")
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Microsoft signup error:", error)
+      let errorMessage = "Failed to create account with Microsoft. Please try again."
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = "Sign up was cancelled. Please try again."
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = "Pop-up was blocked. Please allow pop-ups and try again."
+      } else if (error.code === 'auth/account-exists-with-different-credential') {
+        errorMessage = "An account with this email already exists with a different sign-in method."
+      }
+      
       toast({
         title: "Sign up failed",
-        description: "Failed to create account with Google. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       })
     }
@@ -110,9 +143,9 @@ export default function SignUpPage() {
             <CardDescription className="text-center">Enter your information to create your account</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button variant="outline" className="w-full bg-transparent" onClick={handleGoogleSignUp}>
-              <Chrome className="mr-2 h-4 w-4" />
-              Continue with Google
+            <Button variant="outline" className="w-full bg-transparent" onClick={handleMicrosoftSignUp}>
+              <Building2 className="mr-2 h-4 w-4" />
+              Continue with Microsoft
             </Button>
 
             <div className="relative">
@@ -128,9 +161,9 @@ export default function SignUpPage() {
               <CompanyAutocomplete
                 value={companyName}
                 onValueChange={setCompanyName}
-                placeholder="Search for your company..."
-                label="Company Name"
-                required
+                placeholder="Enter your company name or search..."
+                label="Company Name (Optional but recommended)"
+                required={false}
               />
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -141,6 +174,7 @@ export default function SignUpPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -148,10 +182,12 @@ export default function SignUpPage() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder="Enter your password (minimum 6 characters)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={isLoading}
+                  minLength={6}
                 />
               </div>
               <div className="space-y-2">
@@ -163,6 +199,7 @@ export default function SignUpPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                  disabled={isLoading}
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>

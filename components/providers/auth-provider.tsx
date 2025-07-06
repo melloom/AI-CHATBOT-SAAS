@@ -51,7 +51,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               updatedAt: new Date().toISOString()
             })
             userProfile.approvalStatus = 'approved'
+            console.log("Auto-approved admin user:", user.uid)
           }
+          
+          // Log the user's approval status for debugging
+          console.log("User profile loaded:", {
+            uid: user.uid,
+            email: userProfile?.email,
+            approvalStatus: userProfile?.approvalStatus,
+            isAdmin: userProfile?.isAdmin,
+            companyName: userProfile?.companyName
+          })
           
           setProfile(userProfile)
         } catch (error) {

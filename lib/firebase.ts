@@ -200,6 +200,44 @@ export const getApprovedCompanies = async () => {
   }))
 }
 
+// Get all companies that need approval (admins only)
+export const getAllCompaniesNeedingApproval = async () => {
+  const user = auth.currentUser
+  if (!user) throw new Error("User not authenticated")
+  
+  const isAdmin = await isCurrentUserAdmin()
+  if (!isAdmin) throw new Error("Access denied - Admin only")
+  
+  try {
+    // Get all companies first
+    const allCompaniesQuery = query(
+      collection(db, "companies"),
+      orderBy("createdAt", "desc")
+    )
+    
+    const allCompaniesSnapshot = await getDocs(allCompaniesQuery)
+    const allCompanies = allCompaniesSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
+    
+    // Filter companies that need approval (pending or no approvalStatus)
+    const companiesNeedingApproval = allCompanies.filter((company: any) => {
+      const status = company.approvalStatus || 'pending'
+      return status === 'pending' || status === undefined || status === null
+    })
+    
+    console.log("All companies:", allCompanies.length)
+    console.log("Companies needing approval:", companiesNeedingApproval.length)
+    console.log("Companies needing approval:", companiesNeedingApproval)
+    
+    return companiesNeedingApproval
+  } catch (error) {
+    console.error("Error fetching companies needing approval:", error)
+    throw error
+  }
+}
+
 // Get pending company approvals (admins only)
 export const getPendingCompanyApprovals = async () => {
   const user = auth.currentUser
@@ -208,17 +246,25 @@ export const getPendingCompanyApprovals = async () => {
   const isAdmin = await isCurrentUserAdmin()
   if (!isAdmin) throw new Error("Access denied - Admin only")
   
-  const companiesQuery = query(
-    collection(db, "companies"),
-    where("approvalStatus", "==", "pending"),
-    orderBy("createdAt", "desc")
-  )
-  
-  const querySnapshot = await getDocs(companiesQuery)
-  return querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }))
+  try {
+    const companiesQuery = query(
+      collection(db, "companies"),
+      where("approvalStatus", "==", "pending"),
+      orderBy("createdAt", "desc")
+    )
+    
+    const querySnapshot = await getDocs(companiesQuery)
+    const results = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
+    
+    console.log("Found pending companies:", results.length)
+    return results
+  } catch (error) {
+    console.error("Error fetching pending company approvals:", error)
+    throw error
+  }
 }
 
 // Update company approval status (admins only)
@@ -229,27 +275,50 @@ export const updateCompanyApprovalStatus = async (companyId: string, status: 'ap
   const isAdmin = await isCurrentUserAdmin()
   if (!isAdmin) throw new Error("Access denied - Admin only")
   
-  // Update company status
-  await updateDoc(doc(db, "companies", companyId), {
-    approvalStatus: status,
-    approvedBy: user.uid,
-    approvedAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  })
-
-  // Get the company to find the associated user
-  const companyDoc = await getDoc(doc(db, "companies", companyId))
-  if (companyDoc.exists()) {
+  try {
+    console.log(`Starting approval update for company ${companyId} to status: ${status}`)
+    
+    // First, get the company to find the associated user
+    const companyDoc = await getDoc(doc(db, "companies", companyId))
+    if (!companyDoc.exists()) {
+      throw new Error("Company document not found")
+    }
+    
     const companyData = companyDoc.data()
     const userId = companyData.userId
     
+    console.log(`Company data:`, { companyId, userId, currentStatus: companyData.approvalStatus })
+    
+    // Update company status
+    await updateDoc(doc(db, "companies", companyId), {
+      approvalStatus: status,
+      approvedBy: user.uid,
+      approvedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    })
+    
+    console.log(`Successfully updated company ${companyId} approval status to ${status}`)
+    
+    // Update the user's approval status if userId exists
     if (userId) {
-      // Update the user's approval status
-      await updateDoc(doc(db, "users", userId), {
-        approvalStatus: status,
-        updatedAt: new Date().toISOString()
-      })
+      try {
+        await updateDoc(doc(db, "users", userId), {
+          approvalStatus: status,
+          updatedAt: new Date().toISOString()
+        })
+        console.log(`Successfully updated user ${userId} approval status to ${status}`)
+      } catch (userUpdateError) {
+        console.warn(`Failed to update user ${userId} approval status:`, userUpdateError)
+        // Don't throw error here, as company was updated successfully
+      }
+    } else {
+      console.warn("No userId found in company document:", companyId)
     }
+    
+    return { success: true, companyId, userId, status }
+  } catch (error) {
+    console.error("Error updating company approval status:", error)
+    throw error
   }
 }
 

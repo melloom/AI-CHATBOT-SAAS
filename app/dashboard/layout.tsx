@@ -34,6 +34,7 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!loading && !user) {
+      console.log("No user found, redirecting to login")
       router.push("/login")
     }
     
@@ -42,9 +43,20 @@ export default function DashboardLayout({
       const approvalStatus = profile.approvalStatus || 'pending'
       const isAdmin = profile.isAdmin || false
       
+      console.log("Dashboard layout check:", {
+        userId: user.uid,
+        email: user.email,
+        approvalStatus,
+        isAdmin,
+        profile: profile
+      })
+      
       // Only redirect if not approved and not admin
       if (approvalStatus !== 'approved' && !isAdmin) {
+        console.log("User not approved and not admin, redirecting to pending-approval")
         router.push("/pending-approval")
+      } else {
+        console.log("User approved or admin, allowing dashboard access")
       }
     }
   }, [user, loading, profile, router])

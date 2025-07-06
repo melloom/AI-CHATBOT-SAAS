@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { collection, getDocs, doc, updateDoc, addDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { backupCompanyData, deleteCompanyData, downloadBackupAsJSON } from "@/lib/company-backup"
 import { useRouter } from "next/navigation"
 import { 
   Navigation, 
@@ -32,7 +33,10 @@ import {
   Check,
   ArrowRight,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  Trash2,
+  Download,
+  AlertCircle
 } from "lucide-react"
 import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
 
@@ -93,6 +97,12 @@ export default function CompanyNavigationSettingsPage() {
     status: "active",
     reason: ""
   })
+  
+  // Delete Company State
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deletingCompany, setDeletingCompany] = useState(false)
+  const [backupCreated, setBackupCreated] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState("")
   const [pathManagement, setPathManagement] = useState({
     allowedPaths: [] as string[],
     blockedPaths: [] as string[],
@@ -506,6 +516,52 @@ export default function CompanyNavigationSettingsPage() {
     return iconMap[iconName] || Building2
   }
 
+  // Delete Company Functions
+  const handleDeleteCompany = async () => {
+    if (!selectedCompany || deleteConfirmation !== selectedCompany.companyName) {
+      return
+    }
+
+    setDeletingCompany(true)
+    try {
+      console.log(`Starting deletion process for ${selectedCompany.companyName}...`)
+      
+      // Step 1: Create backup
+      if (!backupCreated) {
+        console.log("Creating backup...")
+        const backup = await backupCompanyData(selectedCompany.id)
+        downloadBackupAsJSON(backup, selectedCompany.companyName)
+        setBackupCreated(true)
+        console.log("Backup created and downloaded")
+      }
+      
+      // Step 2: Delete company data
+      console.log("Deleting company data...")
+      await deleteCompanyData(selectedCompany.id)
+      
+      // Step 3: Update local state
+      setCompanies(companies.filter(c => c.id !== selectedCompany.id))
+      
+      console.log(`Successfully deleted ${selectedCompany.companyName}`)
+      setShowDeleteDialog(false)
+      setSelectedCompany(null)
+      setBackupCreated(false)
+      setDeleteConfirmation("")
+      
+    } catch (error) {
+      console.error("Error deleting company:", error)
+    } finally {
+      setDeletingCompany(false)
+    }
+  }
+
+  const handleDeleteAction = (company: Company) => {
+    setSelectedCompany(company)
+    setShowDeleteDialog(true)
+    setBackupCreated(false)
+    setDeleteConfirmation("")
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -690,6 +746,15 @@ export default function CompanyNavigationSettingsPage() {
                   >
                     <CreditCard className="w-3 h-3 mr-1" />
                     Billing
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeleteAction(company)}
+                    className="text-xs h-8 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                  >
+                    <Trash2 className="w-3 h-3 mr-1" />
+                    Delete
                   </Button>
                 </div>
               </div>
@@ -1551,6 +1616,101 @@ export default function CompanyNavigationSettingsPage() {
                 <>
                   <Save className="w-4 h-4 mr-2" />
                   Save Navigation
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Company Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-red-600">
+              <AlertCircle className="w-5 h-5" />
+              <span>Delete Company</span>
+            </DialogTitle>
+            <DialogDescription>
+              This action will permanently delete {selectedCompany?.companyName} and all associated data. 
+              A backup will be created and downloaded before deletion.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Backup Status */}
+            {backupCreated && (
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200">
+                <div className="flex items-center space-x-2">
+                  <Download className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                    Backup created and downloaded
+                  </span>
+                </div>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                  All company data has been backed up to your device
+                </p>
+              </div>
+            )}
+
+            {/* Warning */}
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200">
+              <div className="flex items-start space-x-2">
+                <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium text-red-700 dark:text-red-300 mb-1">
+                    This action cannot be undone
+                  </p>
+                  <ul className="text-xs text-red-600 dark:text-red-400 space-y-1">
+                    <li>• All users and their data will be deleted</li>
+                    <li>• All chatbots and conversations will be removed</li>
+                    <li>• All analytics and settings will be lost</li>
+                    <li>• All subscriptions and billing data will be deleted</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Confirmation Input */}
+            <div className="space-y-2">
+              <Label htmlFor="delete-confirmation">
+                Type the company name to confirm deletion
+              </Label>
+              <Input
+                id="delete-confirmation"
+                placeholder={selectedCompany?.companyName}
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                className="border-red-200 focus:border-red-500"
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter "{selectedCompany?.companyName}" to confirm
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteDialog(false)}
+              disabled={deletingCompany}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleDeleteCompany}
+              disabled={deletingCompany || deleteConfirmation !== selectedCompany?.companyName}
+            >
+              {deletingCompany ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Company
                 </>
               )}
             </Button>

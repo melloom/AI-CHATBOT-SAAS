@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -9,38 +8,57 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { signInWithEmailAndPassword, signInWithMicrosoft } from "@/lib/auth-client"
-import { Chrome, ArrowLeft } from "lucide-react"
+import { Chrome, ArrowLeft, Building2 } from "lucide-react"
 import Image from "next/image"
-import { FaMicrosoft } from "react-icons/fa"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
       await signInWithEmailAndPassword(email, password)
+      
       toast({
-        title: "Welcome back to ChatHub!",
-        description: "You have been successfully logged in.",
+        title: "Sign in successful!",
+        description: "Welcome back to ChatHub.",
       })
-      // Let the dashboard layout handle the redirect based on approval status
-      router.push("/dashboard")
-    } catch (error) {
+      
+      // Add a small delay to ensure the auth state is updated
+      setTimeout(() => {
+        router.push("/dashboard")
+      }, 500)
+      
+    } catch (error: any) {
+      console.error("Sign in error:", error)
+      
+      let errorMessage = "Failed to sign in. Please check your credentials and try again."
+      
+      // Handle specific error cases
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = "No account found with this email address."
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage = "Incorrect password. Please try again."
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = "Too many failed attempts. Please try again later."
+      } else if (error.code === 'auth/user-disabled') {
+        errorMessage = "This account has been disabled. Please contact support."
+      } else if (error.message && error.message.includes('Account temporarily locked')) {
+        errorMessage = error.message
+      }
+      
       toast({
-        title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        title: "Sign in failed",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
@@ -48,25 +66,34 @@ export default function LoginPage() {
     }
   }
 
-  const handleMicrosoftLogin = async () => {
+  const handleMicrosoftSignIn = async () => {
+    setIsLoading(true)
     try {
       await signInWithMicrosoft()
       toast({
-        title: "Welcome!",
-        description: "You have been successfully logged in with Microsoft.",
+        title: "Sign in successful!",
+        description: "Welcome back to ChatHub.",
       })
-      router.push("/dashboard")
-    } catch (error) {
+      
+      // Add a small delay to ensure the auth state is updated
+      setTimeout(() => {
+        router.push("/dashboard")
+      }, 500)
+      
+    } catch (error: any) {
+      console.error("Microsoft sign in error:", error)
       toast({
-        title: "Login failed",
-        description: "Failed to login with Microsoft. Please try again.",
+        title: "Sign in failed",
+        description: "Failed to sign in with Microsoft. Please try again.",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         {/* Logo Header */}
         <div className="text-center mb-8">
@@ -77,47 +104,20 @@ export default function LoginPage() {
               width={32} 
               height={32} 
               className="h-8 w-8"
-              priority
             />
             <span className="font-bold text-2xl dark:text-white">ChatHub</span>
           </Link>
         </div>
 
-        {/* Back Button */}
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => router.push("/chathub")}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to ChatHub
-          </Button>
-        </div>
-
         <Card className="glass-card">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>
-            <CardDescription className="text-center">
-              Enter your email and password to access your account
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+            <CardDescription>
+              Sign in to your ChatHub account
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button variant="outline" className="w-full bg-transparent flex items-center justify-center" onClick={handleMicrosoftLogin}>
-              <FaMicrosoft className="mr-2 h-4 w-4 text-blue-700 dark:text-blue-400" />
-              Continue with Microsoft
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-gray-700 dark:text-gray-200">Or continue with</span>
-              </div>
-            </div>
-
-            <form onSubmit={handleEmailLogin} className="space-y-4">
+            <form onSubmit={handleEmailSignIn} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -140,33 +140,64 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="remember-me"
-                  checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                />
-                <Label htmlFor="remember-me" className="text-sm font-normal">
-                  Remember me
-                </Label>
-              </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Signing in..." : "Sign in"}
               </Button>
             </form>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <Button 
+              variant="outline" 
+              type="button" 
+              className="w-full" 
+              onClick={handleMicrosoftSignIn}
+              disabled={isLoading}
+            >
+              <Building2 className="mr-2 h-4 w-4" />
+              {isLoading ? "Signing in..." : "Sign in with Microsoft"}
+            </Button>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-2">
-            <Link href="/reset-password" className="text-sm text-muted-foreground hover:text-primary">
-              Forgot your password?
-            </Link>
-            <div className="text-sm text-muted-foreground">
+          <CardFooter className="flex flex-col space-y-4">
+            <div className="text-center text-sm">
+              <Link 
+                href="/reset-password" 
+                className="text-primary hover:underline"
+              >
+                Forgot your password?
+              </Link>
+            </div>
+            <div className="text-center text-sm">
               Don't have an account?{" "}
-              <Link href="/signup" className="text-primary hover:underline">
+              <Link 
+                href="/signup" 
+                className="text-primary hover:underline"
+              >
                 Sign up
               </Link>
             </div>
           </CardFooter>
         </Card>
+
+        {/* Back to Home */}
+        <div className="text-center mt-6">
+          <Link 
+            href="/" 
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   )
