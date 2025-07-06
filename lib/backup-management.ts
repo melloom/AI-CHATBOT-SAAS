@@ -64,7 +64,8 @@ export class BackupManagementService {
       )
     } catch (error) {
       console.error('Failed to get all backups:', error)
-      throw error
+      // Return empty array instead of throwing error
+      return []
     }
   }
 
@@ -72,6 +73,16 @@ export class BackupManagementService {
   async getBackupsByType(type: 'company' | 'user'): Promise<BackupItem[]> {
     try {
       const collectionName = type === 'company' ? 'deleted_companies' : 'deleted_users'
+      
+      // First try to get all documents without filters to see if collection exists
+      const allDocs = await getDocs(collection(db, collectionName))
+      
+      if (allDocs.empty) {
+        console.log(`No documents found in ${collectionName} collection`)
+        return []
+      }
+      
+      // If collection has documents, try with filters
       const q = query(
         collection(db, collectionName),
         where('canRecover', '==', true),
@@ -85,7 +96,8 @@ export class BackupManagementService {
       })) as BackupItem[]
     } catch (error) {
       console.error(`Failed to get ${type} backups:`, error)
-      throw error
+      // Return empty array instead of throwing error
+      return []
     }
   }
 
@@ -192,7 +204,14 @@ export class BackupManagementService {
       }
     } catch (error) {
       console.error('Failed to get backup stats:', error)
-      throw error
+      // Return default stats instead of throwing error
+      return {
+        totalBackups: 0,
+        companyBackups: 0,
+        userBackups: 0,
+        expiredBackups: 0,
+        recoverableBackups: 0
+      }
     }
   }
 } 
