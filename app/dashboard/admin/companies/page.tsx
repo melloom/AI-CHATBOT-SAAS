@@ -596,12 +596,12 @@ export default function CompaniesManagementPage() {
           
           {companyToDelete && (
             <div className="space-y-4">
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <Building2 className="w-8 h-8 text-red-500" />
+                  <Building2 className="w-8 h-8 text-red-500 dark:text-red-400" />
                   <div>
-                    <h4 className="font-semibold text-red-800">{companyToDelete.companyName}</h4>
-                    <p className="text-sm text-red-600">{companyToDelete.email}</p>
+                    <h4 className="font-semibold text-red-800 dark:text-red-200">{companyToDelete.companyName}</h4>
+                    <p className="text-sm text-red-600 dark:text-red-300">{companyToDelete.email}</p>
                     <div className="flex items-center space-x-2 mt-1">
                       <Badge variant="outline">{companyToDelete.subscription}</Badge>
                       <Badge variant={companyToDelete.status === 'active' ? 'default' : 'secondary'}>
@@ -619,7 +619,7 @@ export default function CompaniesManagementPage() {
                   <li>All associated chatbots</li>
                   <li>Company data and configurations</li>
                 </ul>
-                <p className="mt-2 text-blue-600">
+                <p className="mt-2 text-blue-600 dark:text-blue-400">
                   <strong>Note:</strong> A backup will be created before deletion for recovery purposes.
                 </p>
               </div>

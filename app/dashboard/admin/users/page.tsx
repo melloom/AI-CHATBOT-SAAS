@@ -1222,17 +1222,17 @@ export default function AdminUsersPage() {
           
           {userToDelete && (
             <div className="space-y-4">
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <Avatar className="w-10 h-10">
                     <AvatarImage src={userToDelete.photoURL} />
-                    <AvatarFallback className="bg-red-100 text-red-600">
+                    <AvatarFallback className="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300">
                       {userToDelete.displayName?.charAt(0) || userToDelete.email.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h4 className="font-semibold text-red-800">{userToDelete.displayName || 'No Name'}</h4>
-                    <p className="text-sm text-red-600">{userToDelete.email}</p>
+                    <h4 className="font-semibold text-red-800 dark:text-red-200">{userToDelete.displayName || 'No Name'}</h4>
+                    <p className="text-sm text-red-600 dark:text-red-300">{userToDelete.email}</p>
                     <div className="flex items-center space-x-2 mt-1">
                       {getRoleBadge(userToDelete.role || 'user')}
                       {getStatusBadge(userToDelete.approvalStatus || 'pending')}
@@ -1249,7 +1249,7 @@ export default function AdminUsersPage() {
                   <li>User's access to the platform</li>
                   <li>Associated company membership</li>
                 </ul>
-                <p className="mt-2 text-blue-600">
+                <p className="mt-2 text-blue-600 dark:text-blue-400">
                   <strong>Note:</strong> A backup will be created before deletion for recovery purposes.
                 </p>
               </div>
