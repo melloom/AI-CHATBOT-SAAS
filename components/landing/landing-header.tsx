@@ -31,6 +31,9 @@ export function LandingHeader() {
           <Link href="#services" className="text-sm font-medium hover:text-primary dark:text-gray-300 dark:hover:text-white">
             Services
           </Link>
+          <Link href="/personal-ai-agents" className="text-sm font-medium hover:text-primary dark:text-gray-300 dark:hover:text-white">
+            AI Agents
+          </Link>
           <Link href="#pricing" className="text-sm font-medium hover:text-primary dark:text-gray-300 dark:hover:text-white">
             Pricing
           </Link>

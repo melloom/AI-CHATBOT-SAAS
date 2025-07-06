@@ -12,7 +12,10 @@ import {
   MessageCircle,
   ArrowRight,
   ArrowLeft,
-  Globe
+  Globe,
+  Building2,
+  User,
+  UserPlus
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -60,6 +63,13 @@ export function WebBuildingNavigation({ activeSection, setActiveSection }: WebBu
       icon: Bot, 
       href: "/web-building/home?section=chatbot",
       description: "AI Integration"
+    },
+    { 
+      id: "business", 
+      label: "Business Services", 
+      icon: Building2, 
+      href: "/web-building/business-services",
+      description: "Legal & Compliance"
     },
     { 
       id: "contact", 
@@ -125,8 +135,24 @@ export function WebBuildingNavigation({ activeSection, setActiveSection }: WebBu
             </Button>
           </div>
 
-          {/* Theme Toggle and Change Preference - Far Right */}
+          {/* Theme Toggle and Auth Buttons - Far Right */}
           <div className="flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.location.href = '/signup?redirect=webvault'}
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Register
+            </Button>
+            <Button 
+              size="sm"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              onClick={() => window.location.href = '/login?redirect=webvault'}
+            >
+              <User className="w-4 h-4 mr-2" />
+              Login
+            </Button>
             <ThemeToggle />
           </div>
         </div>

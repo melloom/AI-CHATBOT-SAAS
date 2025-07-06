@@ -356,13 +356,13 @@ export function ChatbotSection({ setActiveSection }: ChatbotSectionProps) {
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Transform Your Customer Support?</h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
               Join thousands of businesses using ChatHub to provide 24/7 AI-powered customer support. 
-              Start your free trial today and see the difference AI can make for your business.
+              Get started today and see the difference AI can make for your business.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/">
                 <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
                   <Globe className="w-5 h-5 mr-2" />
-                  Start Free Trial
+                  Get Started
                 </Button>
               </Link>
               <Button 

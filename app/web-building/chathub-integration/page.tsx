@@ -24,69 +24,16 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { EnhancedBackButton } from "@/components/ui/enhanced-back-button"
+import { chathubIntegrationPlans } from "@/lib/pricing-config"
 
 export default function ChatHubIntegrationPage() {
   const router = useRouter()
 
-  const integrationPlans = [
-    {
-      name: "Basic Integration",
-      price: "$200/month",
-      description: "Perfect for small businesses",
-      features: [
-        "AI-powered chatbot setup",
-        "Basic training on your business",
-        "Website integration",
-        "Email support",
-        "Basic analytics",
-        "Up to 1,000 conversations/month",
-        "Standard response templates",
-        "Business hours support",
-        "Monthly reports",
-        "Basic customization"
-      ],
-      popular: false,
-      icon: Bot
-    },
-    {
-      name: "Professional Integration",
-      price: "$500/month",
-      description: "Ideal for growing businesses",
-      features: [
-        "Everything in Basic, plus:",
-        "Advanced AI training",
-        "Multi-platform integration",
-        "Custom chatbot personality",
-        "Advanced analytics dashboard",
-        "Up to 10,000 conversations/month",
-        "Priority support",
-        "Custom integrations",
-        "Performance optimization",
-        "Quarterly strategy sessions"
-      ],
-      popular: true,
-      icon: Star
-    },
-    {
-      name: "Enterprise Integration",
-      price: "$1,000/month",
-      description: "For large organizations",
-      features: [
-        "Everything in Professional, plus:",
-        "Custom AI model training",
-        "Unlimited conversations",
-        "Advanced security features",
-        "Dedicated support team",
-        "Custom development hours",
-        "API access",
-        "White-label solutions",
-        "Strategic consulting",
-        "24/7 support"
-      ],
-      popular: false,
-      icon: TrendingUp
-    }
-  ]
+  const integrationPlans = chathubIntegrationPlans.map(plan => ({
+    ...plan,
+    icon: plan.name.includes("Basic") ? Bot :
+          plan.name.includes("Professional") ? Star : TrendingUp
+  }))
 
   const platforms = [
     {

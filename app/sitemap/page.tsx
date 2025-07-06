@@ -39,6 +39,7 @@ export default function SitemapPage() {
       pages: [
         { name: "Home", url: "/", description: "Main landing page" },
         { name: "About", url: "/about", description: "About ChatHub and our mission" },
+        { name: "Personal AI Agents", url: "/personal-ai-agents", description: "Personal AI assistants for daily tasks" },
         { name: "Contact", url: "/contact", description: "Get in touch with us" },
         { name: "FAQ", url: "/faq", description: "Frequently asked questions" },
         { name: "Blog", url: "/blog", description: "Our blog and insights" },
@@ -60,6 +61,7 @@ export default function SitemapPage() {
         { name: "Pricing Plans", url: "/web-building/pricing-plans", description: "Transparent pricing for web services" },
         { name: "Hosting & Maintenance", url: "/web-building/hosting-maintenance", description: "Reliable hosting and maintenance" },
         { name: "ChatHub Integration", url: "/web-building/chathub-integration", description: "AI chatbot integration services" },
+        { name: "Business Services", url: "/web-building/business-services", description: "Legal and business services" },
         { name: "Get Quote", url: "/web-building/quote", description: "Get a free quote for your project" },
         { name: "WebVault FAQ", url: "/web-building/faq", description: "Frequently asked questions about web services" }
       ]

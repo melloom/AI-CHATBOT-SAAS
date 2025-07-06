@@ -26,7 +26,8 @@ import {
   Briefcase,
   Palette,
   Info,
-  Clock
+  Clock,
+  Building2
 } from "lucide-react"
 import { useState } from "react"
 import { QuoteWidget } from "./quote-widget"
@@ -76,6 +77,21 @@ export function WebVaultFooter() {
       ],
       pricing: "Starting from $2,500",
       timeline: "4-8 weeks depending on complexity"
+    },
+    'business-services': {
+      title: "Business & Legal Services",
+      icon: Building2,
+      description: "Complete business and legal services for company formation and compliance",
+      features: [
+        "Company formation and legal setup",
+        "Business plan development",
+        "Legal document templates",
+        "Compliance and regulatory services",
+        "Intellectual property protection",
+        "Industry-specific legal services"
+      ],
+      pricing: "Starting from $300",
+      timeline: "1-4 weeks depending on service"
     },
     'pricing-plans': {
       title: "Pricing Plans",
@@ -231,6 +247,11 @@ export function WebVaultFooter() {
               <li>
                 <Link href="/web-building/chathub-integration" className="hover:text-white transition-colors">
                   ChatHub Integration
+                </Link>
+              </li>
+              <li>
+                <Link href="/web-building/business-services" className="hover:text-white transition-colors">
+                  Business Services
                 </Link>
               </li>
               <li>

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { createUserWithEmailAndPassword, signInWithMicrosoft } from "@/lib/auth-client"
-import { Chrome, ArrowLeft, Building2 } from "lucide-react"
+import { Chrome, ArrowLeft, Building2, Brain } from "lucide-react"
 import Image from "next/image"
 import { CompanyAutocomplete } from "@/components/ui/company-autocomplete"
 
@@ -21,9 +21,21 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [companyName, setCompanyName] = useState("")
+  const [accountType, setAccountType] = useState<"business" | "personal">("business")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const { toast } = useToast()
+
+  // Check for redirect parameter to determine account type and platform
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const redirect = urlParams.get('redirect')
+    if (redirect === 'personal-ai') {
+      setAccountType('personal')
+    } else if (redirect === 'webvault') {
+      setAccountType('business')
+    }
+  }, [])
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,13 +61,32 @@ export default function SignUpPage() {
     setIsLoading(true)
 
     try {
-      console.log("Creating user with email:", email, "company:", companyName)
-      await createUserWithEmailAndPassword(email, password, companyName)
-      toast({
-        title: "Account created successfully!",
-        description: "Your account has been created and is pending approval. You'll be notified once approved.",
-      })
-      router.push("/pending-approval")
+      const urlParams = new URLSearchParams(window.location.search)
+      const redirect = urlParams.get('redirect')
+      const platform = redirect || 'general'
+      
+      console.log("Creating user with email:", email, "company:", companyName, "accountType:", accountType, "platform:", platform)
+      await createUserWithEmailAndPassword(email, password, companyName, accountType, platform)
+      
+      if (accountType === 'personal') {
+        toast({
+          title: "Personal AI account created successfully!",
+          description: "Your personal AI assistant account is ready. Welcome to ChatHub!",
+        })
+        router.push("/dashboard/personal-ai")
+      } else if (platform === 'webvault') {
+        toast({
+          title: "WebVault account created successfully!",
+          description: "Your account has been created and is pending approval. You'll be notified once approved.",
+        })
+        router.push("/pending-approval")
+      } else {
+        toast({
+          title: "Account created successfully!",
+          description: "Your account has been created and is pending approval. You'll be notified once approved.",
+        })
+        router.push("/pending-approval")
+      }
     } catch (error: any) {
       console.error("Signup error:", error)
       let errorMessage = "Failed to create account. Please try again."
@@ -80,13 +111,32 @@ export default function SignUpPage() {
 
   const handleMicrosoftSignUp = async () => {
     try {
-      console.log("Starting Microsoft signup...")
-      await signInWithMicrosoft()
-      toast({
-        title: "Welcome!",
-        description: "Your account has been created and is pending approval. You'll be notified once approved.",
-      })
-      router.push("/pending-approval")
+      const urlParams = new URLSearchParams(window.location.search)
+      const redirect = urlParams.get('redirect')
+      const platform = redirect || 'general'
+      
+      console.log("Starting Microsoft signup...", "accountType:", accountType, "platform:", platform)
+      await signInWithMicrosoft(accountType, platform)
+      
+      if (accountType === 'personal') {
+        toast({
+          title: "Personal AI account created successfully!",
+          description: "Your personal AI assistant account is ready. Welcome to ChatHub!",
+        })
+        router.push("/dashboard/personal-ai")
+      } else if (platform === 'webvault') {
+        toast({
+          title: "WebVault account created successfully!",
+          description: "Your account has been created and is pending approval. You'll be notified once approved.",
+        })
+        router.push("/pending-approval")
+      } else {
+        toast({
+          title: "Welcome!",
+          description: "Your account has been created and is pending approval. You'll be notified once approved.",
+        })
+        router.push("/pending-approval")
+      }
     } catch (error: any) {
       console.error("Microsoft signup error:", error)
       let errorMessage = "Failed to create account with Microsoft. Please try again."
@@ -140,9 +190,39 @@ export default function SignUpPage() {
         <Card className="glass-card">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Create account</CardTitle>
-            <CardDescription className="text-center">Enter your information to create your account</CardDescription>
+            <CardDescription className="text-center">
+              {accountType === 'personal' 
+                ? 'Create your personal AI assistant account' 
+                : 'Enter your information to create your account'
+              }
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Account Type Selection */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Account Type</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant={accountType === 'business' ? 'default' : 'outline'}
+                  onClick={() => setAccountType('business')}
+                  className="w-full"
+                >
+                  <Building2 className="w-4 h-4 mr-2" />
+                  Business
+                </Button>
+                <Button
+                  type="button"
+                  variant={accountType === 'personal' ? 'default' : 'outline'}
+                  onClick={() => setAccountType('personal')}
+                  className="w-full"
+                >
+                  <Brain className="w-4 h-4 mr-2" />
+                  Personal AI
+                </Button>
+              </div>
+            </div>
+
             <Button variant="outline" className="w-full bg-transparent" onClick={handleMicrosoftSignUp}>
               <Building2 className="mr-2 h-4 w-4" />
               Continue with Microsoft
@@ -158,13 +238,15 @@ export default function SignUpPage() {
             </div>
 
             <form onSubmit={handleEmailSignUp} className="space-y-4">
-              <CompanyAutocomplete
-                value={companyName}
-                onValueChange={setCompanyName}
-                placeholder="Enter your company name or search..."
-                label="Company Name (Optional but recommended)"
-                required={false}
-              />
+              {accountType === 'business' && (
+                <CompanyAutocomplete
+                  value={companyName}
+                  onValueChange={setCompanyName}
+                  placeholder="Enter your company name or search..."
+                  label="Company Name (Optional but recommended)"
+                  required={false}
+                />
+              )}
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input

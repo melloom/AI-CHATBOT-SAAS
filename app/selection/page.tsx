@@ -29,9 +29,13 @@ export default function SelectionPage() {
 
   useEffect(() => {
     // Check if user already has a preference and redirect them
+    // But only if they're not coming from a back navigation
     const userPreference = localStorage.getItem('userServicePreference')
+    const hasVisitedSelection = localStorage.getItem('hasVisitedSelection')
     
-    if (userPreference) {
+    // Only auto-redirect if they haven't visited selection before
+    // This prevents auto-redirect when using back button
+    if (userPreference && !hasVisitedSelection) {
       if (userPreference === 'web-building') {
         router.push('/web-building/home')
       } else {

@@ -6,42 +6,12 @@ import { Badge } from "@/components/ui/badge"
 import { CreditCard, ExternalLink, Calendar, DollarSign } from "lucide-react"
 import { useSubscription } from "@/hooks/use-subscription"
 import { useToast } from "@/hooks/use-toast"
+import { chathubPlans } from "@/lib/pricing-config"
 
-const plans = [
-  {
-    name: "Starter",
-    price: "$29",
-    period: "month",
-    features: ["Up to 3 chatbots", "1,000 conversations/month", "Basic analytics", "Email support"],
-    current: false,
-  },
-  {
-    name: "Pro",
-    price: "$79",
-    period: "month",
-    features: [
-      "Up to 10 chatbots",
-      "10,000 conversations/month",
-      "Advanced analytics",
-      "Priority support",
-      "Custom branding",
-    ],
-    current: true,
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    period: "",
-    features: [
-      "Unlimited chatbots",
-      "Unlimited conversations",
-      "White-label solution",
-      "Dedicated support",
-      "Custom integrations",
-    ],
-    current: false,
-  },
-]
+const plans = chathubPlans.map(plan => ({
+  ...plan,
+  current: plan.name === "Pro" // Set current plan based on subscription
+}))
 
 export default function BillingPage() {
   const { subscription } = useSubscription()

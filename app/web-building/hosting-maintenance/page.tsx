@@ -24,126 +24,22 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { EnhancedBackButton } from "@/components/ui/enhanced-back-button"
+import { hostingPlans as hostingPlansConfig, maintenanceServices as maintenanceServicesConfig } from "@/lib/pricing-config"
 
 export default function HostingMaintenancePage() {
   const router = useRouter()
 
-  const hostingPlans = [
-    {
-      name: "Basic Hosting",
-      price: "$20/month",
-      description: "Perfect for small websites",
-      features: [
-        "10 GB SSD storage",
-        "Unlimited bandwidth",
-        "SSL certificate included",
-        "Daily backups",
-        "99.9% uptime guarantee",
-        "24/7 monitoring",
-        "Email support",
-        "1 domain included",
-        "5 email accounts",
-        "Basic security"
-      ],
-      popular: false,
-      icon: Server
-    },
-    {
-      name: "Professional Hosting",
-      price: "$50/month",
-      description: "Ideal for growing businesses",
-      features: [
-        "Everything in Basic, plus:",
-        "50 GB SSD storage",
-        "Unlimited domains",
-        "Unlimited email accounts",
-        "Advanced security features",
-        "CDN integration",
-        "Priority support",
-        "Performance optimization",
-        "Advanced analytics",
-        "Custom error pages"
-      ],
-      popular: true,
-      icon: Star
-    },
-    {
-      name: "Enterprise Hosting",
-      price: "$100/month",
-      description: "For high-traffic websites",
-      features: [
-        "Everything in Professional, plus:",
-        "200 GB SSD storage",
-        "Dedicated IP address",
-        "Advanced caching",
-        "Load balancing",
-        "DDoS protection",
-        "24/7 phone support",
-        "Custom server configuration",
-        "Advanced monitoring",
-        "Performance consulting"
-      ],
-      popular: false,
-      icon: Zap
-    }
-  ]
+  const hostingPlans = hostingPlansConfig.map(plan => ({
+    ...plan,
+    icon: plan.name.includes("Basic") ? Server :
+          plan.name.includes("Professional") ? Star : Zap
+  }))
 
-  const maintenanceServices = [
-    {
-      name: "Basic Maintenance",
-      price: "$50/month",
-      description: "Essential website maintenance",
-      features: [
-        "Weekly security updates",
-        "Monthly backups",
-        "Performance monitoring",
-        "Uptime monitoring",
-        "Basic troubleshooting",
-        "Email support",
-        "Plugin updates",
-        "Content updates (5 hours/month)",
-        "SEO monitoring",
-        "Analytics reporting"
-      ],
-      icon: RefreshCw
-    },
-    {
-      name: "Professional Maintenance",
-      price: "$100/month",
-      description: "Comprehensive maintenance package",
-      features: [
-        "Everything in Basic, plus:",
-        "Daily security scans",
-        "Weekly backups",
-        "Performance optimization",
-        "Priority support",
-        "Content updates (10 hours/month)",
-        "Advanced SEO optimization",
-        "Social media management",
-        "Monthly reports",
-        "Training sessions"
-      ],
-      icon: Shield
-    },
-    {
-      name: "Enterprise Maintenance",
-      price: "$200/month",
-      description: "Full-service maintenance",
-      features: [
-        "Everything in Professional, plus:",
-        "24/7 monitoring",
-        "Instant security patches",
-        "Real-time backups",
-        "Dedicated support team",
-        "Unlimited content updates",
-        "Custom development hours",
-        "Strategic consulting",
-        "Quarterly reviews",
-        "Emergency response"
-      ],
-      icon: TrendingUp
-    }
-  ]
+  const maintenanceServices = maintenanceServicesConfig.map(service => ({
+    ...service,
+    icon: service.name.includes("Basic") ? RefreshCw :
+          service.name.includes("Professional") ? Shield : TrendingUp
+  }))
 
   const benefits = [
     {

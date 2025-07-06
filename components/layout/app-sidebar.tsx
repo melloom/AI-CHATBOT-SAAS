@@ -1,6 +1,6 @@
 "use client"
 
-import { Bot, LayoutDashboard, MessageSquare, Store, CreditCard, Users, Settings, LogOut, Crown, Shield, Navigation, Bell, Wrench, BarChart3, Building2, UserCheck, Cog, Activity, Globe } from "lucide-react"
+import { Bot, LayoutDashboard, MessageSquare, Store, CreditCard, Users, Settings, LogOut, Crown, Shield, Navigation, Bell, Wrench, BarChart3, Building2, UserCheck, Cog, Activity, Globe, Brain, Plus, FileText } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -22,7 +22,8 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { ReadOnlyIndicator } from "@/components/ui/read-only-indicator"
 
-const menuItems = [
+// Business account menu items
+const businessMenuItems = [
   {
     title: "Dashboard",
     url: "/dashboard",
@@ -32,6 +33,11 @@ const menuItems = [
     title: "ChatHub",
     url: "/dashboard/chatbots",
     icon: Bot,
+  },
+  {
+    title: "Personal AI",
+    url: "/dashboard/personal-ai",
+    icon: Brain,
   },
   {
     title: "Marketplace",
@@ -62,6 +68,40 @@ const menuItems = [
     title: "Settings",
     url: "/dashboard/settings",
     icon: Settings,
+  },
+]
+
+// Personal AI account menu items
+const personalMenuItems = [
+  {
+    title: "Dashboard",
+    url: "/dashboard/personal-ai",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "My AI Assistants",
+    url: "/dashboard/personal-ai",
+    icon: Brain,
+  },
+  {
+    title: "Create Assistant",
+    url: "/dashboard/personal-ai/create",
+    icon: Plus,
+  },
+  {
+    title: "Templates",
+    url: "/dashboard/personal-ai/templates",
+    icon: FileText,
+  },
+  {
+    title: "Settings",
+    url: "/dashboard/personal-ai/settings",
+    icon: Settings,
+  },
+  {
+    title: "Billing",
+    url: "/dashboard/billing",
+    icon: CreditCard,
   },
 ]
 
@@ -183,6 +223,50 @@ export function AppSidebar() {
     isImpersonating,
     canEdit
   } = useImpersonation()
+
+  // Determine menu items based on account type and platform access
+  const getMenuItems = () => {
+    if (profile?.accountType === 'personal') {
+      return personalMenuItems
+    }
+    
+    // For business accounts, show menu items based on platform access
+    const userPlatforms = profile?.platforms || {}
+    const hasWebVault = userPlatforms.webvault?.access
+    const hasChatHub = userPlatforms.chathub?.access
+    const hasPersonalAI = userPlatforms['personal-ai']?.access
+    
+    // If user has specific platform access, show relevant items
+    if (hasWebVault && !hasChatHub && !hasPersonalAI) {
+      return [
+        {
+          title: "Dashboard",
+          url: "/dashboard",
+          icon: LayoutDashboard,
+        },
+        {
+          title: "WebVault",
+          url: "/dashboard/web-building",
+          icon: Globe,
+        },
+        {
+          title: "Billing",
+          url: "/dashboard/billing",
+          icon: CreditCard,
+        },
+        {
+          title: "Settings",
+          url: "/dashboard/settings",
+          icon: Settings,
+        },
+      ]
+    }
+    
+    // Default business menu items
+    return businessMenuItems
+  }
+
+  const menuItems = getMenuItems()
 
   const handleSignOut = async () => {
     try {

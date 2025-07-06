@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Mail, Phone, MapPin, Clock, Send, MessageCircle, Globe, Shield, Zap, Users, Building2, CheckCircle, AlertCircle, ArrowLeft } from "lucide-react"
+import { Mail, Phone, MapPin, Clock, Send, MessageCircle, Globe, Shield, Zap, Users, Building2, CheckCircle, AlertCircle, ArrowLeft, ShoppingCart, Headphones, TrendingUp, Calendar, FileText, Briefcase, CreditCard, Database, Bot } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { EnhancedBackButton } from "@/components/ui/enhanced-back-button"
+import { budgetRanges } from "@/lib/pricing-config"
 
 // Client component for contact page with form functionality
 
@@ -34,19 +35,136 @@ export default function ContactPage() {
     service: 'general',
     experience: '',
     skills: '',
-    collaborationType: ''
+    collaborationType: '',
+    integration: '',
+    integrationType: '',
+    integrationDescription: '',
+    aiType: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [selectedIntegration, setSelectedIntegration] = useState<any>(null)
+  const [personalAISelection, setPersonalAISelection] = useState<any>(null)
+  const [isDemoRequest, setIsDemoRequest] = useState(false)
 
   // Handle URL parameters for pre-filling form
   useEffect(() => {
     const subject = searchParams.get('subject')
+    const integration = searchParams.get('integration')
+    
     if (subject === 'career-opportunity') {
       setFormData(prev => ({
         ...prev,
         subject: 'Collaboration Opportunity',
         service: 'consulting'
+      }))
+    }
+    
+    // Check for integration request from integrations page
+    if (integration === 'true') {
+      const storedIntegration = localStorage.getItem('selectedIntegration')
+      const integrationType = localStorage.getItem('integrationType')
+      
+      console.log('Integration parameter found:', integration)
+      console.log('Stored integration from localStorage:', storedIntegration)
+      console.log('Integration type from localStorage:', integrationType)
+      
+      if (storedIntegration) {
+        const integrationData = JSON.parse(storedIntegration)
+        console.log('Parsed integration data:', integrationData)
+        
+        // Map icon name back to component
+        const iconMap: { [key: string]: any } = {
+          'MessageCircle': MessageCircle,
+          'Users': Users,
+          'Phone': Phone,
+          'ShoppingCart': ShoppingCart,
+          'Headphones': Headphones,
+          'Building2': Building2,
+          'TrendingUp': TrendingUp,
+          'Calendar': Calendar,
+          'FileText': FileText,
+          'Mail': Mail,
+          'Briefcase': Briefcase,
+          'CreditCard': CreditCard,
+          'Database': Database
+        }
+        
+        const integrationWithIcon = {
+          ...integrationData,
+          icon: iconMap[integrationData.iconName] || MessageCircle
+        }
+        
+        console.log('Integration with icon:', integrationWithIcon)
+        
+        setSelectedIntegration(integrationWithIcon)
+        setFormData(prev => ({
+          ...prev,
+          integration: integrationData.name,
+          integrationType: integrationType || '',
+          integrationDescription: integrationData.description,
+          service: 'chatbot-integration',
+          subject: `Integration Request: ${integrationData.name}`
+        }))
+        
+        console.log('Form data updated with integration')
+        
+        // Clear the stored integration data
+        localStorage.removeItem('selectedIntegration')
+        localStorage.removeItem('integrationType')
+        localStorage.removeItem('integrationRequest')
+      } else {
+        console.log('No stored integration found in localStorage')
+      }
+    } else {
+      console.log('No integration parameter found in URL')
+    }
+
+    // Check for personal AI assistant selection and demo requests
+    const service = searchParams.get('service')
+    if (service === 'personal-ai-assistant') {
+      const storedPlan = localStorage.getItem('selectedPersonalAIPlan')
+      const storedAddons = localStorage.getItem('personalAIAddons')
+      const contactData = localStorage.getItem('personalAIContactData')
+      
+      console.log('Personal AI Assistant service detected')
+      console.log('Stored plan:', storedPlan)
+      console.log('Stored addons:', storedAddons)
+      console.log('Contact data:', contactData)
+      
+      if (contactData) {
+        const selectionData = JSON.parse(contactData)
+        setPersonalAISelection(selectionData)
+        
+        // Pre-fill form with selection data
+        setFormData(prev => ({
+          ...prev,
+          service: 'personal-ai-assistant',
+          subject: `Personal AI Assistant Request - ${selectionData.selectedPlan?.name || 'Custom Plan'}`,
+          message: `I'm interested in setting up a Personal AI Assistant with the following configuration:
+
+Selected Plan: ${selectionData.selectedPlan?.name || 'Not selected'}
+Plan Price: ${selectionData.selectedPlan?.price || 'N/A'}
+
+Selected Addons (${selectionData.totalAddons}):
+${selectionData.selectedAddons?.map((addon: any) => `- ${addon.name}: ${addon.price}`).join('\n') || 'None selected'}
+
+Total Monthly Cost: $${selectionData.totalAddonCost + (selectionData.selectedPlan ? parseFloat(selectionData.selectedPlan.price.replace(/[^0-9.]/g, '')) : 0)}
+
+Please contact me to discuss implementation details and get started.`
+        }))
+        
+        console.log('Form data updated with personal AI selection')
+      } else {
+        console.log('No personal AI selection data found')
+      }
+    } else if (service === 'demo') {
+      setIsDemoRequest(true)
+      setFormData(prev => ({
+        ...prev,
+        service: 'demo',
+        subject: 'Demo Request - Personal AI Assistant',
+        message: 'I would like to schedule a demo to see how the Personal AI Assistant works and discuss my specific needs.'
       }))
     }
   }, [searchParams])
@@ -85,8 +203,13 @@ export default function ContactPage() {
         service: 'general',
         experience: '',
         skills: '',
-        collaborationType: ''
+        collaborationType: '',
+        integration: '',
+        integrationType: '',
+        integrationDescription: '',
+        aiType: ''
       })
+      setSelectedIntegration(null)
       
       // Reset success message after 5 seconds
       setTimeout(() => setSubmitStatus('idle'), 5000)
@@ -97,6 +220,8 @@ export default function ContactPage() {
     { value: 'general', label: 'General Inquiry' },
     { value: 'web-development', label: 'Web Development' },
     { value: 'chatbot-integration', label: 'Chatbot Integration' },
+    { value: 'personal-ai-assistant', label: 'Personal AI Assistant' },
+    { value: 'demo', label: 'Demo Request' },
     { value: 'hosting', label: 'Hosting Services' },
     { value: 'maintenance', label: 'Website Maintenance' },
     { value: 'consulting', label: 'Consulting' }
@@ -135,6 +260,17 @@ export default function ContactPage() {
     { value: 'webflow', label: 'Webflow - Great for beautiful designs' },
     { value: 'php-laravel', label: 'Custom built - Full control over everything' },
     { value: 'not-sure', label: 'Not sure - help me choose the best option' }
+  ]
+
+  const aiTypes = [
+    { value: 'personal-assistant', label: 'Personal AI Assistant' },
+    { value: 'customer-support', label: 'Customer Support Bot' },
+    { value: 'sales-assistant', label: 'Sales & Lead Generation' },
+    { value: 'content-creation', label: 'Content Creation AI' },
+    { value: 'data-analysis', label: 'Data Analysis & Research' },
+    { value: 'automation', label: 'Task Automation' },
+    { value: 'custom', label: 'Custom AI Solution' },
+    { value: 'not-sure', label: 'Not sure - need guidance' }
   ]
 
   const features = [
@@ -188,14 +324,16 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <Badge variant="secondary" className="mb-4 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
-              {isCareerInquiry ? 'Collaboration Opportunities' : 'Get In Touch'}
+              {isCareerInquiry ? 'Collaboration Opportunities' : isDemoRequest ? 'Demo Request' : 'Get In Touch'}
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              {isCareerInquiry ? 'Let\'s Collaborate!' : "Let's Build Something Amazing Together"}
+              {isCareerInquiry ? 'Let\'s Collaborate!' : isDemoRequest ? 'Schedule Your AI Demo' : "Let's Build Something Amazing Together"}
             </h1>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               {isCareerInquiry 
                 ? "I'm a solo developer open to exciting collaboration opportunities. Whether you want to join my projects or have me join yours, let's discuss how we can work together to create amazing things."
+                : isDemoRequest
+                ? "Experience the power of AI firsthand with a personalized demo. See how our AI solutions can transform your workflow and boost productivity."
                 : "Ready to transform your business with cutting-edge web development and AI chatbot solutions? Our expert team is here to turn your vision into reality."
               }
             </p>
@@ -207,14 +345,43 @@ export default function ContactPage() {
               <Card className="shadow-xl border-0 bg-gradient-to-br from-white to-purple-50/30 dark:from-card dark:to-purple-900/10">
                 <CardHeader>
                   <CardTitle className="text-2xl">
-                    {isCareerInquiry ? 'Let\'s Discuss Collaboration' : 'Start Your Project'}
+                    {isCareerInquiry ? 'Let\'s Discuss Collaboration' : isDemoRequest ? 'Request Your Demo' : 'Start Your Project'}
                   </CardTitle>
                   <CardDescription>
                     {isCareerInquiry 
                       ? "Share your background and what you're looking for, and I'll get back to you within 24 hours to discuss potential collaboration opportunities."
+                      : isDemoRequest
+                      ? "Tell us about your needs and we'll schedule a personalized demo to show you how AI can transform your workflow."
                       : "Tell us about your project and we'll get back to you within 24 hours with a detailed proposal."
                     }
                   </CardDescription>
+                  
+                  {/* Integration Display */}
+                  {selectedIntegration && (
+                    <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-10 h-10 ${selectedIntegration.gradient} rounded-lg flex items-center justify-center text-white`}>
+                          <selectedIntegration.icon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-purple-900 dark:text-purple-100">
+                            Integration Request: {selectedIntegration.name}
+                          </h3>
+                          <p className="text-sm text-purple-700 dark:text-purple-300">
+                            {selectedIntegration.description}
+                          </p>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <Badge variant="secondary" className="text-xs">
+                              {selectedIntegration.category}
+                            </Badge>
+                            <Badge className="bg-green-500 text-white text-xs">
+                              {selectedIntegration.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent>
                   {submitStatus === 'success' && (
@@ -229,6 +396,56 @@ export default function ContactPage() {
                       <AlertCircle className="w-5 h-5 text-red-600" />
                       <span className="text-red-800 dark:text-red-200">Something went wrong. Please try again or contact us directly.</span>
                     </div>
+                  )}
+
+                  {/* Personal AI Selection Display */}
+                  {personalAISelection && (
+                    <Card className="mb-6 border-2 border-purple-200 dark:border-purple-700 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+                      <CardHeader>
+                        <div className="flex items-center space-x-2">
+                          <Bot className="w-5 h-5 text-purple-600" />
+                          <CardTitle className="text-lg">Personal AI Assistant Selection</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {personalAISelection.selectedPlan && (
+                          <div className="p-3 bg-white dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold text-foreground">Selected Plan</h4>
+                              <Badge className="bg-purple-600 text-white">{personalAISelection.selectedPlan.price}</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{personalAISelection.selectedPlan.name}</p>
+                            <p className="text-xs text-muted-foreground">{personalAISelection.selectedPlan.description}</p>
+                          </div>
+                        )}
+                        
+                        {personalAISelection.selectedAddons && personalAISelection.selectedAddons.length > 0 && (
+                          <div className="space-y-2">
+                            <h4 className="font-semibold text-foreground">Selected Addons ({personalAISelection.totalAddons})</h4>
+                            <div className="grid gap-2 md:grid-cols-2">
+                              {personalAISelection.selectedAddons.map((addon: any, index: number) => (
+                                <div key={index} className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded-lg">
+                                  <div>
+                                    <p className="text-sm font-medium text-foreground">{addon.name}</p>
+                                    <p className="text-xs text-muted-foreground">{addon.description}</p>
+                                  </div>
+                                  <Badge variant="secondary" className="text-xs">{addon.price}</Badge>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="border-t pt-3">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-foreground">Total Monthly Cost:</span>
+                            <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                              ${personalAISelection.totalAddonCost + (personalAISelection.selectedPlan ? parseFloat(personalAISelection.selectedPlan.price.replace(/[^0-9.]/g, '')) : 0)}
+                            </span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   )}
 
                   <form onSubmit={handleSubmit} className="space-y-6">
@@ -363,6 +580,103 @@ export default function ContactPage() {
                             value={formData.message}
                             onChange={handleInputChange}
                             placeholder="Share your background, experience, what you're passionate about, and how you'd like to collaborate. What projects interest you? What skills do you bring to the table?"
+                            rows={6}
+                            required
+                          />
+                        </div>
+                      </>
+                    ) : isDemoRequest ? (
+                      // Demo Request Form
+                      <>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <Label htmlFor="firstName">First Name *</Label>
+                            <Input 
+                              id="firstName" 
+                              name="firstName"
+                              value={formData.firstName}
+                              onChange={handleInputChange}
+                              placeholder="John" 
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="lastName">Last Name *</Label>
+                            <Input 
+                              id="lastName" 
+                              name="lastName"
+                              value={formData.lastName}
+                              onChange={handleInputChange}
+                              placeholder="Doe" 
+                              required
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div>
+                            <Label htmlFor="email">Email *</Label>
+                            <Input 
+                              id="email" 
+                              name="email"
+                              type="email" 
+                              value={formData.email}
+                              onChange={handleInputChange}
+                              placeholder="john@example.com" 
+                              required
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="company">Company</Label>
+                            <Input 
+                              id="company" 
+                              name="company"
+                              value={formData.company}
+                              onChange={handleInputChange}
+                              placeholder="Your Company" 
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="aiType">What type of AI are you interested in? *</Label>
+                          <select 
+                            id="aiType" 
+                            name="aiType"
+                            value={formData.aiType || ''}
+                            onChange={handleInputChange}
+                            className="w-full mt-1 p-3 border rounded-md bg-background text-foreground border-input focus:ring-2 focus:ring-ring focus:border-ring"
+                            required
+                          >
+                            <option value="">Select AI type</option>
+                            {aiTypes.map((type) => (
+                              <option key={type.value} value={type.value}>
+                                {type.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="subject">Subject *</Label>
+                          <Input 
+                            id="subject" 
+                            name="subject"
+                            value={formData.subject}
+                            onChange={handleInputChange}
+                            placeholder="Demo Request" 
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="message">Tell us about your needs and what you'd like to see in the demo *</Label>
+                          <Textarea 
+                            id="message" 
+                            name="message"
+                            value={formData.message}
+                            onChange={handleInputChange}
+                            placeholder="Describe your current challenges, what you're looking to achieve with AI, and any specific features or capabilities you'd like to see demonstrated."
                             rows={6}
                             required
                           />
@@ -533,11 +847,9 @@ export default function ContactPage() {
                               className="w-full mt-1 p-3 border rounded-md bg-background text-foreground border-input focus:ring-2 focus:ring-ring focus:border-ring"
                             >
                               <option value="">Select budget</option>
-                              <option value="$1,000 - $3,000">$1,000 - $3,000</option>
-                              <option value="$3,000 - $5,000">$3,000 - $5,000</option>
-                              <option value="$5,000 - $10,000">$5,000 - $10,000</option>
-                              <option value="$10,000 - $20,000">$10,000 - $20,000</option>
-                              <option value="$20,000+">$20,000+</option>
+                              {budgetRanges.map((range, index) => (
+                                <option key={index} value={range}>{range}</option>
+                              ))}
                               <option value="Need to discuss">Need to discuss</option>
                             </select>
                           </div>
@@ -597,11 +909,9 @@ export default function ContactPage() {
                           className="w-full mt-1 p-3 border rounded-md bg-background text-foreground border-input focus:ring-2 focus:ring-ring focus:border-ring"
                         >
                           <option value="">Select budget</option>
-                          <option value="$1,000 - $3,000">$1,000 - $3,000</option>
-                          <option value="$3,000 - $5,000">$3,000 - $5,000</option>
-                          <option value="$5,000 - $10,000">$5,000 - $10,000</option>
-                          <option value="$10,000 - $20,000">$10,000 - $20,000</option>
-                          <option value="$20,000+">$20,000+</option>
+                          {budgetRanges.map((range, index) => (
+                            <option key={index} value={range}>{range}</option>
+                          ))}
                           <option value="Need to discuss">Need to discuss</option>
                         </select>
                       </div>

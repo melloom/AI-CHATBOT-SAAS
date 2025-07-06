@@ -87,7 +87,7 @@ export default function LandingPage() {
             <div className="animate-fade-slide-in delay-100">
               <p className="text-lg md:text-xl text-purple-700 dark:text-purple-200 font-semibold mb-2">Pick a path and let's get started!</p>
               <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Choose the perfect solution for your digital needs. Both services are designed to help you succeed.
+                Choose the perfect solution for your digital needs. From business chatbots to personal AI assistants, we have everything you need to succeed.
               </p>
             </div>
           </div>
@@ -220,6 +220,24 @@ export default function LandingPage() {
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Additional Services */}
+          <div className="text-center mt-16">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              More AI Solutions
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              Looking for personal AI assistance? Check out our individual AI agent plans.
+            </p>
+            <Button 
+              variant="outline" 
+              className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300 dark:hover:bg-purple-900/20"
+              onClick={() => router.push('/personal-ai-agents')}
+            >
+              Explore Personal AI Agents
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
           </div>
 
           {/* Footer Note */}

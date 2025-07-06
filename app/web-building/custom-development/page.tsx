@@ -24,72 +24,28 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { EnhancedBackButton } from "@/components/ui/enhanced-back-button"
+import { customDevelopmentServices } from "@/lib/pricing-config"
 
 export default function CustomDevelopmentPage() {
   const router = useRouter()
 
-  const services = [
-    {
-      icon: Globe,
-      title: "Custom Website Development",
-      description: "Tailored websites built specifically for your business needs",
-      features: [
-        "Responsive design for all devices",
-        "SEO optimization",
-        "Fast loading times",
-        "Custom functionality",
-        "Content management system",
-        "Analytics integration"
-      ],
-      price: "Starting from $2,500",
-      timeline: "4-8 weeks"
-    },
-    {
-      icon: Smartphone,
-      title: "Mobile App Development",
-      description: "Native and cross-platform mobile applications",
-      features: [
-        "iOS and Android development",
-        "Cross-platform solutions",
-        "App store optimization",
-        "Push notifications",
-        "Offline functionality",
-        "User authentication"
-      ],
-      price: "Starting from $8,000",
-      timeline: "8-16 weeks"
-    },
-    {
-      icon: Database,
-      title: "Web Application Development",
-      description: "Complex web applications and SaaS platforms",
-      features: [
-        "User management systems",
-        "Payment processing",
-        "Real-time features",
-        "API development",
-        "Database design",
-        "Security implementation"
-      ],
-      price: "Starting from $15,000",
-      timeline: "12-24 weeks"
-    },
-    {
-      icon: Palette,
-      title: "E-commerce Solutions",
-      description: "Complete online store development",
-      features: [
-        "Product catalog management",
-        "Shopping cart functionality",
-        "Payment gateway integration",
-        "Inventory management",
-        "Order processing",
-        "Customer accounts"
-      ],
-      price: "Starting from $5,000",
-      timeline: "6-12 weeks"
-    }
-  ]
+  const services = customDevelopmentServices.map(service => ({
+    icon: service.name.includes("Website") ? Globe :
+          service.name.includes("Mobile") ? Smartphone :
+          service.name.includes("Application") ? Database : Palette,
+    title: service.name,
+    description: service.description,
+    features: [
+      "Responsive design for all devices",
+      "SEO optimization",
+      "Fast loading times",
+      "Custom functionality",
+      "Content management system",
+      "Analytics integration"
+    ],
+    price: service.price,
+    timeline: "4-8 weeks"
+  }))
 
   const technologies = [
     { name: "React & Next.js", icon: "⚛️", description: "Modern, fast web applications" },
