@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
+import { getAuthHeaders } from "@/lib/auth-client"
 import { 
   Database, 
   Users, 
@@ -63,10 +64,9 @@ export default function BackupRecoveryComponent() {
   const loadBackups = async () => {
     try {
       setLoading(true)
+      const headers = await getAuthHeaders()
       const response = await fetch('/api/settings/backup-management', {
-        headers: {
-          'Authorization': `Bearer ${await getAuthToken()}`
-        }
+        headers
       })
 
       if (response.ok) {
@@ -93,12 +93,6 @@ export default function BackupRecoveryComponent() {
     }
   }
 
-  const getAuthToken = async (): Promise<string | null> => {
-    // This should be implemented based on your auth system
-    // For now, we'll return null and handle auth in the API
-    return null
-  }
-
   const handleRecoverBackup = async (backup: BackupItem) => {
     setBackupToRecover(backup)
     setShowRecoverDialog(true)
@@ -109,11 +103,13 @@ export default function BackupRecoveryComponent() {
 
     setRecovering(true)
     try {
+      const headers = await getAuthHeaders()
+      
       const response = await fetch('/api/settings/backup-management', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await getAuthToken()}`
+          ...headers,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           action: 'recover',
@@ -154,11 +150,13 @@ export default function BackupRecoveryComponent() {
   const handleCleanupExpired = async () => {
     setCleaningUp(true)
     try {
+      const headers = await getAuthHeaders()
+      
       const response = await fetch('/api/settings/backup-management', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await getAuthToken()}`
+          ...headers,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           action: 'cleanup'
