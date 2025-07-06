@@ -46,6 +46,7 @@ import { PlatformConfigTest } from "@/components/settings/platform-config-test"
 import { SystemPreferencesTest } from "@/components/settings/system-preferences-test"
 import { FeatureTogglesTest } from "@/components/settings/feature-toggles-test"
 import { LimitsQuotasTest } from "@/components/settings/limits-quotas-test"
+import BackupRecoveryComponent from "@/components/settings/backup-recovery"
 
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState("general")
@@ -337,7 +338,7 @@ export default function AdminSettingsPage() {
 
       {/* Settings Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
@@ -345,6 +346,7 @@ export default function AdminSettingsPage() {
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
           <TabsTrigger value="platform">Platform</TabsTrigger>
           <TabsTrigger value="operations">Operations</TabsTrigger>
+          <TabsTrigger value="backup">Backup</TabsTrigger>
           <TabsTrigger value="test">Test</TabsTrigger>
         </TabsList>
 
@@ -386,6 +388,10 @@ export default function AdminSettingsPage() {
             </Button>
           </div>
           <SystemMaintenanceDashboard />
+        </TabsContent>
+
+        <TabsContent value="backup" className="space-y-6">
+          <BackupRecoveryComponent />
         </TabsContent>
 
         <TabsContent value="test" className="space-y-6">

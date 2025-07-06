@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { collection, getDocs, addDoc, doc, deleteDoc, getDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { BackupManagementService } from "@/lib/backup-management"
 import { useRouter } from "next/navigation"
 import { 
   Users, 
@@ -195,18 +196,19 @@ export default function CompaniesManagementPage() {
     try {
       console.log(`Deleting company: ${companyToDelete.companyName} (${companyToDelete.id})`)
 
-      // Create backup before deletion
+      // Create backup using the backup management service
+      const backupService = BackupManagementService.getInstance()
       const companyDoc = await getDoc(doc(db, "companies", companyToDelete.id))
+      
       if (companyDoc.exists()) {
-        const backupData = {
-          ...companyDoc.data(),
-          deletedAt: new Date().toISOString(),
-          deletedBy: "admin"
-        }
-        
-        // Store backup in a separate collection
-        await addDoc(collection(db, "deleted_companies"), backupData)
-        console.log("Company backup created before deletion")
+        const companyData = companyDoc.data()
+        await backupService.createBackup(
+          companyToDelete.id,
+          'company',
+          companyData,
+          'admin' // You can get the actual admin user ID here
+        )
+        console.log("Company backup created with 30-day retention")
       }
 
       // Delete the company

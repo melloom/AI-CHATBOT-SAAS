@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/hooks/use-auth"
 import { collection, getDoc, doc, addDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { BackupManagementService } from "@/lib/backup-management"
 import { ReadOnlyIndicator } from "@/components/ui/read-only-indicator"
 import { 
   Crown, 
@@ -205,18 +206,19 @@ export default function AdminUsersPage() {
     try {
       console.log(`Deleting user: ${userToDelete.email} (${userToDelete.id})`)
 
-      // Create backup before deletion
+      // Create backup using the backup management service
+      const backupService = BackupManagementService.getInstance()
       const userDoc = await getDoc(doc(db, "users", userToDelete.id))
+      
       if (userDoc.exists()) {
-        const backupData = {
-          ...userDoc.data(),
-          deletedAt: new Date().toISOString(),
-          deletedBy: "admin"
-        }
-        
-        // Store backup in a separate collection
-        await addDoc(collection(db, "deleted_users"), backupData)
-        console.log("User backup created before deletion")
+        const userData = userDoc.data()
+        await backupService.createBackup(
+          userToDelete.id,
+          'user',
+          userData,
+          'admin' // You can get the actual admin user ID here
+        )
+        console.log("User backup created with 30-day retention")
       }
 
       // Delete the user
@@ -229,7 +231,7 @@ export default function AdminUsersPage() {
       
       toast({
         title: "User Deleted",
-        description: `${userToDelete.displayName || userToDelete.email} has been deleted successfully.`,
+        description: `${userToDelete.displayName || userToDelete.email} has been deleted successfully. Backup available for 30 days.`,
         variant: "default"
       })
       

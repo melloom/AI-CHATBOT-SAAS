@@ -188,6 +188,18 @@ service cloud.firestore {
       allow write: if canWrite();
     }
     
+    // DELETED COMPANIES - Only admins can access
+    match /deleted_companies/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // DELETED USERS - Only admins can access
+    match /deleted_users/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
     // AUDIT LOGS - Only admins can access
     match /auditLogs/{document} {
       allow read: if isAdmin();
