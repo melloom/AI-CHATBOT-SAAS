@@ -4,12 +4,14 @@ service cloud.firestore {
     // Helper function to check if user is admin
     function isAdmin() {
       return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
     
     // Helper function to check if user is read-only admin
     function isReadOnlyAdmin() {
       return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isReadOnly == true;
     }
@@ -17,8 +19,15 @@ service cloud.firestore {
     // Helper function to check if user can write (admin but not read-only)
     function canWrite() {
       return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isReadOnly != true;
+    }
+    
+    // Helper function to check if user belongs to company
+    function belongsToCompany(companyId) {
+      return request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.companyId == companyId;
     }
     
     // USERS
@@ -27,47 +36,56 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       // Admins can read all user documents, but only non-read-only admins can write
       allow read: if isAdmin();
-      allow write: if canWrite();
+      allow write: if isAdmin();
     }
     
     // COMPANIES
     match /companies/{companyId} {
       // Company owner can read/write their own company
-      allow read, write: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.companyId == companyId;
-      // Admins can read all companies, but only non-read-only admins can write
+      allow read, write: if request.auth != null && belongsToCompany(companyId);
+      // Admins can read/write all companies
       allow read: if isAdmin();
-      allow write: if canWrite();
+      allow write: if isAdmin();
       // Anyone can read approved companies
       allow read: if resource.data.approvalStatus == 'approved';
     }
     
+    // COMPANY APPROVALS - Special collection for approval management
+    match /companyApprovals/{approvalId} {
+      allow read, write: if canWrite();
+      allow read: if isAdmin();
+    }
+    
     // NOTIFICATIONS - Admin users can read/write their own notifications
     match /notifications/{notificationId} {
-      allow read, write: if request.auth != null && 
-        (resource.data.userId == request.auth.uid || isAdmin());
-      // Read-only admins can only read
-      allow write: if request.auth != null && 
-        (resource.data.userId == request.auth.uid || canWrite());
+      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read, write: if isAdmin();
     }
     
     // CHATBOTS
     match /chatbots/{chatbotId} {
       // Users can read/write their own chatbots
       allow read, write: if request.auth != null && 
-        request.auth.uid == resource.data.userId;
+        resource.data.userId == request.auth.uid;
+      // Company members can read/write their company's chatbots
+      allow read, write: if request.auth != null && 
+        belongsToCompany(resource.data.companyId);
       // Admins can read all chatbots, but only non-read-only admins can write
       allow read: if isAdmin();
-      allow write: if canWrite();
+      allow write: if isAdmin();
     }
     
     // CONVERSATIONS
     match /conversations/{conversationId} {
       // Users can read/write their own conversations
       allow read, write: if request.auth != null && 
-        request.auth.uid == resource.data.userId;
+        resource.data.userId == request.auth.uid;
+      // Company members can read/write their company's conversations
+      allow read, write: if request.auth != null && 
+        belongsToCompany(resource.data.companyId);
       // Admins can read all conversations, but only non-read-only admins can write
       allow read: if isAdmin();
-      allow write: if canWrite();
+      allow write: if isAdmin();
     }
     
     // SUBSCRIPTIONS
@@ -75,13 +93,25 @@ service cloud.firestore {
       // Users can read/write their own subscriptions
       allow read, write: if request.auth != null && 
         request.auth.uid == subscriptionId;
+      // Company members can read/write their company's subscriptions
+      allow read, write: if request.auth != null && 
+        belongsToCompany(resource.data.companyId);
       // Admins can read all subscriptions, but only non-read-only admins can write
       allow read: if isAdmin();
-      allow write: if canWrite();
+      allow write: if isAdmin();
     }
     
     // ANALYTICS - Only admins can access analytics data
     match /analytics/{document} {
+      allow read, write: if isAdmin();
+    }
+    
+    // SETTINGS - Company-specific settings
+    match /settings/{settingId} {
+      // Company members can read/write their company's settings
+      allow read, write: if request.auth != null && 
+        belongsToCompany(resource.data.companyId);
+      // Admins can read/write all settings
       allow read: if isAdmin();
       allow write: if canWrite();
     }
@@ -89,7 +119,7 @@ service cloud.firestore {
     // SYSTEM SETTINGS - Allow authenticated users to read, but only admins can write
     match /systemSettings/{document} {
       allow read: if request.auth != null;
-      allow write: if canWrite();
+      allow write: if isAdmin();
     }
     
     // SECURITY SETTINGS - Only non-read-only admins can write
@@ -106,6 +136,72 @@ service cloud.firestore {
     
     // PLATFORM SETTINGS - Only non-read-only admins can write
     match /platformSettings/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // MAINTENANCE SETTINGS - Only admins can access
+    match /maintenanceSettings/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // FEATURE TOGGLES - Only admins can access
+    match /featureToggles/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // LIMITS AND QUOTAS - Only admins can access
+    match /limitsAndQuotas/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // ACCESS CONTROL - Only admins can access
+    match /accessControl/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // SYSTEM PREFERENCES - Only admins can access
+    match /systemPreferences/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // PLATFORM CONFIG - Only admins can access
+    match /platformConfig/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // SYSTEM ANNOUNCEMENTS - Only admins can write, everyone can read
+    match /systemAnnouncements/{document} {
+      allow read: if request.auth != null;
+      allow write: if canWrite();
+    }
+    
+    // BACKUP DATA - Only admins can access
+    match /backupData/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // AUDIT LOGS - Only admins can access
+    match /auditLogs/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // PERFORMANCE METRICS - Only admins can access
+    match /performanceMetrics/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // ERROR LOGS - Only admins can access
+    match /errorLogs/{document} {
       allow read: if isAdmin();
       allow write: if canWrite();
     }
