@@ -1155,7 +1155,7 @@ export default function CompanyNavigationSettingsPage() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span>Amount</span>
-                  <span className="text-sm font-medium">$29.99/month</span>
+                  <span className="text-sm font-medium">$299/month</span>
                 </div>
               </div>
             </div>

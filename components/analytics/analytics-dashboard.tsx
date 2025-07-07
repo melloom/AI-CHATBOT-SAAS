@@ -589,16 +589,16 @@ export function AnalyticsDashboard({
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Basic Plan</span>
-                    <span className="font-semibold">$4,200</span>
+                    <span className="text-sm text-muted-foreground">Starter Plan</span>
+                    <span className="font-semibold">$9,900</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Pro Plan</span>
-                    <span className="font-semibold">$8,100</span>
+                    <span className="text-sm text-muted-foreground">Professional Plan</span>
+                    <span className="font-semibold">$29,900</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Enterprise</span>
-                    <span className="font-semibold">$3,120</span>
+                    <span className="font-semibold">$79,900</span>
                   </div>
                   <div className="border-t pt-4">
                     <div className="flex justify-between items-center font-semibold">

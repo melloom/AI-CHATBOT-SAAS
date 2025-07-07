@@ -51,12 +51,20 @@ export default function DashboardLayout({
         profile: profile
       })
       
-      // Only redirect if not approved and not admin
-      if (approvalStatus !== 'approved' && !isAdmin) {
-        console.log("User not approved and not admin, redirecting to pending-approval")
+      // Check if user has WebVault access (WebVault accounts should be auto-approved)
+      const hasWebVaultAccess = profile.platforms?.webvault?.access
+      const hasAnyApprovedPlatform = Object.keys(profile.platforms || {}).some(platform => {
+        const platformData = profile.platforms[platform]
+        return platformData?.access && platformData?.subscription?.status === 'active'
+      })
+      
+      // Users with WebVault access or any approved platform should not see approval screen
+      // Only redirect if not approved and not admin and doesn't have any approved platform access
+      if (approvalStatus !== 'approved' && !isAdmin && !hasAnyApprovedPlatform) {
+        console.log("User not approved and not admin and no approved platform access, redirecting to pending-approval")
         router.push("/pending-approval")
       } else {
-        console.log("User approved or admin, allowing dashboard access")
+        console.log("User approved or admin or has approved platform access, allowing dashboard access")
       }
     }
   }, [user, loading, profile, router])
@@ -73,8 +81,14 @@ export default function DashboardLayout({
     return null
   }
 
-  // Don't render dashboard if user is not approved and not admin
-  if (profile && profile.approvalStatus !== 'approved' && !profile.isAdmin) {
+  // Check if user has any approved platform access
+  const hasAnyApprovedPlatform = Object.keys(profile?.platforms || {}).some(platform => {
+    const platformData = profile?.platforms[platform]
+    return platformData?.access && platformData?.subscription?.status === 'active'
+  })
+  
+  // Don't render dashboard if user is not approved and not admin and doesn't have any approved platform access
+  if (profile && profile.approvalStatus !== 'approved' && !profile.isAdmin && !hasAnyApprovedPlatform) {
     return null
   }
 

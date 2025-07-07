@@ -1,6 +1,7 @@
 "use client"
 
-import { Bot, LayoutDashboard, MessageSquare, Store, CreditCard, Users, Settings, LogOut, Crown, Shield, Navigation, Bell, Wrench, BarChart3, Building2, UserCheck, Cog, Activity, Globe, Brain, Plus, FileText } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Bot, LayoutDashboard, MessageSquare, Store, CreditCard, Users, Settings, LogOut, Crown, Shield, Navigation, Bell, Wrench, BarChart3, Building2, UserCheck, Cog, Activity, Globe, Brain, Plus, FileText, Folder, FolderOpen, HelpCircle } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +22,146 @@ import { useImpersonation } from "@/components/providers/impersonation-provider"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { ReadOnlyIndicator } from "@/components/ui/read-only-indicator"
+
+// Platform-specific menu items
+const platformMenuItems = {
+  chathub: [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "ChatHub",
+      url: "/dashboard/chatbots",
+      icon: Bot,
+    },
+    {
+      title: "Marketplace",
+      url: "/dashboard/marketplace",
+      icon: Store,
+    },
+    {
+      title: "Analytics",
+      url: "/dashboard/analytics",
+      icon: BarChart3,
+    },
+    {
+      title: "Team",
+      url: "/dashboard/team",
+      icon: Users,
+    },
+    {
+      title: "Billing",
+      url: "/dashboard/billing",
+      icon: CreditCard,
+    },
+    {
+      title: "Settings",
+      url: "/dashboard/settings",
+      icon: Settings,
+    },
+    {
+      title: "Help",
+      url: "/dashboard/help",
+      icon: HelpCircle,
+    },
+  ],
+  webvault: [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "WebVault",
+      url: "/dashboard/web-building",
+      icon: Globe,
+    },
+    {
+      title: "Request New Web App",
+      url: "/dashboard/web-building/request",
+      icon: Plus,
+    },
+    {
+      title: "Manage Websites",
+      url: "/dashboard/web-building/manage",
+      icon: Folder,
+    },
+    {
+      title: "Website Analytics",
+      url: "/dashboard/web-building/analytics",
+      icon: BarChart3,
+    },
+    {
+      title: "Projects",
+      url: "/dashboard/web-building/projects",
+      icon: FolderOpen,
+    },
+    {
+      title: "Services",
+      url: "/dashboard/web-building/services",
+      icon: Wrench,
+    },
+    {
+      title: "Billing",
+      url: "/dashboard/billing",
+      icon: CreditCard,
+    },
+    {
+      title: "WebVault Settings",
+      url: "/dashboard/web-building/settings",
+      icon: Settings,
+    },
+    {
+      title: "Help",
+      url: "/dashboard/help",
+      icon: HelpCircle,
+    },
+  ],
+  'personal-ai': [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Personal AI",
+      url: "/dashboard/personal-ai",
+      icon: Brain,
+    },
+    {
+      title: "My Assistants",
+      url: "/dashboard/personal-ai",
+      icon: Bot,
+    },
+    {
+      title: "Create Assistant",
+      url: "/dashboard/personal-ai/create",
+      icon: Plus,
+    },
+    {
+      title: "Templates",
+      url: "/dashboard/personal-ai/templates",
+      icon: FileText,
+    },
+    {
+      title: "Billing",
+      url: "/dashboard/billing",
+      icon: CreditCard,
+    },
+    {
+      title: "Settings",
+      url: "/dashboard/personal-ai/settings",
+      icon: Settings,
+    },
+    {
+      title: "Help",
+      url: "/dashboard/help",
+      icon: HelpCircle,
+    },
+  ]
+}
 
 // Business account menu items
 const businessMenuItems = [
@@ -69,6 +210,11 @@ const businessMenuItems = [
     url: "/dashboard/settings",
     icon: Settings,
   },
+  {
+    title: "Help",
+    url: "/dashboard/help",
+    icon: HelpCircle,
+  },
 ]
 
 // Personal AI account menu items
@@ -102,6 +248,11 @@ const personalMenuItems = [
     title: "Billing",
     url: "/dashboard/billing",
     icon: CreditCard,
+  },
+  {
+    title: "Help",
+    url: "/dashboard/help",
+    icon: HelpCircle,
   },
 ]
 
@@ -197,6 +348,16 @@ const adminMenuGroups = [
       },
     ]
   },
+  {
+    label: "Support",
+    items: [
+      {
+        title: "Help",
+        url: "/dashboard/help",
+        icon: HelpCircle,
+      },
+    ]
+  },
 ]
 
 // Add web building to admin menu items when impersonating
@@ -223,6 +384,23 @@ export function AppSidebar() {
     isImpersonating,
     canEdit
   } = useImpersonation()
+  
+  // Platform switching state
+  const [activePlatform, setActivePlatform] = useState<string>('chathub')
+
+  // Determine available platforms for the user (only show active/approved platforms)
+  const userPlatforms = profile?.platforms || {}
+  const availablePlatforms = Object.keys(userPlatforms).filter(platform => {
+    const platformData = userPlatforms[platform]
+    return platformData?.access && platformData?.subscription?.status === 'active'
+  })
+  
+  // Set initial active platform based on available platforms
+  useEffect(() => {
+    if (availablePlatforms.length > 0 && !availablePlatforms.includes(activePlatform)) {
+      setActivePlatform(availablePlatforms[0])
+    }
+  }, [availablePlatforms, activePlatform])
 
   // Determine menu items based on account type and platform access
   const getMenuItems = () => {
@@ -230,39 +408,44 @@ export function AppSidebar() {
       return personalMenuItems
     }
     
-    // For business accounts, show menu items based on platform access
-    const userPlatforms = profile?.platforms || {}
-    const hasWebVault = userPlatforms.webvault?.access
-    const hasChatHub = userPlatforms.chathub?.access
-    const hasPersonalAI = userPlatforms['personal-ai']?.access
+    // For business accounts with multiple platforms, show platform-specific navigation
+    const platformCount = availablePlatforms.length
     
-    // If user has specific platform access, show relevant items
-    if (hasWebVault && !hasChatHub && !hasPersonalAI) {
-      return [
-        {
-          title: "Dashboard",
-          url: "/dashboard",
-          icon: LayoutDashboard,
-        },
-        {
-          title: "WebVault",
-          url: "/dashboard/web-building",
-          icon: Globe,
-        },
-        {
-          title: "Billing",
-          url: "/dashboard/billing",
-          icon: CreditCard,
-        },
-        {
-          title: "Settings",
-          url: "/dashboard/settings",
-          icon: Settings,
-        },
-      ]
+    // Debug: Log platform access for troubleshooting
+    console.log("Sidebar Debug:", {
+      email: profile?.email,
+      accountType: profile?.accountType,
+      isAdmin: profile?.isAdmin,
+      availablePlatforms,
+      platformCount,
+      activePlatform,
+      userPlatforms: profile?.platforms || {}
+    })
+    
+    // If user has multiple platforms, show platform-specific navigation based on active platform
+    if (platformCount > 1) {
+      console.log(`Multi-platform user, showing ${activePlatform} specific navigation`)
+      return platformMenuItems[activePlatform as keyof typeof platformMenuItems] || businessMenuItems
     }
     
-    // Default business menu items
+    // Single platform users get specific navigation
+    if (availablePlatforms.includes('webvault')) {
+      console.log("Showing WebVault specific navigation")
+      return platformMenuItems.webvault
+    }
+    
+    if (availablePlatforms.includes('chathub')) {
+      console.log("Showing ChatHub specific navigation")
+      return platformMenuItems.chathub
+    }
+    
+    if (availablePlatforms.includes('personal-ai')) {
+      console.log("Showing Personal AI specific navigation")
+      return platformMenuItems['personal-ai']
+    }
+    
+    // Default business menu items (fallback)
+    console.log("Using default business menu items")
     return businessMenuItems
   }
 
@@ -290,7 +473,53 @@ export function AppSidebar() {
   const isImpersonatingCompany = isAdmin && impersonatedCompany
 
   // Determine which company name to display
-  const displayCompanyName = impersonatedCompany?.companyName || profile?.companyName || "Your Company"
+  const getMultiPlatformCompanyName = () => {
+    if (availablePlatforms.length > 1) {
+      // Create special names for different platform combinations
+      const sortedPlatforms = availablePlatforms.sort()
+      
+      if (sortedPlatforms.length === 2) {
+        if (sortedPlatforms.includes('chathub') && sortedPlatforms.includes('personal-ai')) {
+          return 'AI Chat Solutions'
+        }
+        if (sortedPlatforms.includes('chathub') && sortedPlatforms.includes('webvault')) {
+          return 'Digital Solutions Hub'
+        }
+        if (sortedPlatforms.includes('personal-ai') && sortedPlatforms.includes('webvault')) {
+          return 'AI Web Solutions'
+        }
+      }
+      
+      if (sortedPlatforms.length === 3) {
+        if (sortedPlatforms.includes('chathub') && sortedPlatforms.includes('personal-ai') && sortedPlatforms.includes('webvault')) {
+          return 'Complete Digital Suite'
+        }
+      }
+      
+      // Fallback: compose a label from all available platforms
+      const platformLabels = availablePlatforms.map(p => {
+        if (p === 'webvault') return 'WebVault'
+        if (p === 'chathub') return 'ChatHub'
+        if (p === 'personal-ai') return 'Personal AI'
+        return p.charAt(0).toUpperCase() + p.slice(1)
+      })
+      return platformLabels.join(' + ') + ' Company'
+    }
+    // Fallback to companyName or default
+    return profile?.companyName || 'Your Company'
+  }
+
+  const displayCompanyName = profile?.accountType === 'personal' 
+    ? "Personal AI Account" 
+    : availablePlatforms.length > 1
+      ? getMultiPlatformCompanyName()
+      : availablePlatforms.includes('webvault')
+        ? "WebVault Company"
+        : availablePlatforms.includes('chathub')
+          ? "ChatHub Company"
+          : availablePlatforms.includes('personal-ai')
+            ? "Personal AI Company"
+            : (impersonatedCompany?.companyName || profile?.companyName || "Your Company")
 
   return (
     <Sidebar className="glass-dark">
@@ -304,7 +533,19 @@ export function AppSidebar() {
             className="h-6 w-6"
             priority
           />
-          <span className="font-bold text-lg">ChatHub</span>
+          <span className="font-bold text-lg">
+            {profile?.accountType === 'personal'
+              ? 'Personal AI'
+              : availablePlatforms.length > 1
+                ? getMultiPlatformCompanyName()
+                : availablePlatforms.includes('webvault')
+                  ? 'WebVault'
+                  : availablePlatforms.includes('chathub')
+                    ? 'ChatHub'
+                    : availablePlatforms.includes('personal-ai')
+                      ? 'Personal AI'
+                      : 'ChatHub'}
+          </span>
         </div>
         <p className="text-sm text-muted-foreground">{displayCompanyName}</p>
         {isImpersonating && (
@@ -329,6 +570,33 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        {/* Platform Switcher for Multi-Platform Users */}
+        {!isAdmin && availablePlatforms.length > 1 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Platforms</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <div className="flex flex-col space-y-1">
+                {availablePlatforms.map((platform) => (
+                  <button
+                    key={platform}
+                    onClick={() => setActivePlatform(platform)}
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                      activePlatform === platform
+                        ? 'bg-primary text-primary-foreground'
+                        : 'hover:bg-accent hover:text-accent-foreground'
+                    }`}
+                  >
+                    {platform === 'chathub' && <Bot className="h-4 w-4" />}
+                    {platform === 'webvault' && <Globe className="h-4 w-4" />}
+                    {platform === 'personal-ai' && <Brain className="h-4 w-4" />}
+                    <span className="capitalize">{platform.replace('-', ' ')}</span>
+                  </button>
+                ))}
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         {isAdmin && (
           <>
             {adminMenuGroups.map((group) => (
@@ -378,7 +646,18 @@ export function AppSidebar() {
         )}
         {!isAdmin && (
           <SidebarGroup>
-            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+            <SidebarGroupLabel>
+              {availablePlatforms.length > 1 
+                ? `${activePlatform === 'webvault' ? 'WebVault' : activePlatform === 'chathub' ? 'ChatHub' : activePlatform === 'personal-ai' ? 'Personal AI' : activePlatform.replace('-', ' ').toUpperCase()} Navigation`
+                : availablePlatforms.includes('webvault')
+                  ? 'WebVault Navigation'
+                  : availablePlatforms.includes('chathub')
+                    ? 'ChatHub Navigation'
+                    : availablePlatforms.includes('personal-ai')
+                      ? 'Personal AI Navigation'
+                      : 'Navigation'
+              }
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {menuItems.map((item) => (
@@ -400,7 +679,20 @@ export function AppSidebar() {
       <SidebarFooter className="border-t px-6 py-4">
         <div className="flex items-center space-x-2">
           <div className="flex-1">
-            <p className="text-sm font-medium">{profile?.companyName || "Your Company"}</p>
+            <p className="text-sm font-medium">
+              {profile?.accountType === 'personal' 
+                ? "Personal AI Account" 
+                : availablePlatforms.length > 1
+                  ? getMultiPlatformCompanyName()
+                  : availablePlatforms.includes('webvault')
+                    ? "WebVault Company"
+                    : availablePlatforms.includes('chathub')
+                      ? "ChatHub Company"
+                      : availablePlatforms.includes('personal-ai')
+                        ? "Personal AI Company"
+                        : (profile?.companyName || "Your Company")
+              }
+            </p>
             <p className="text-xs text-muted-foreground">{profile?.email || "user@company.com"}</p>
           </div>
           <Button variant="ghost" size="icon" onClick={handleSignOut} className="glass-dark">

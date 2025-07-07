@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -28,6 +29,8 @@ import { chathubIntegrationPlans } from "@/lib/pricing-config"
 
 export default function ChatHubIntegrationPage() {
   const router = useRouter()
+
+  const [selectedIntegrationPlan, setSelectedIntegrationPlan] = useState<any>(null)
 
   const integrationPlans = chathubIntegrationPlans.map(plan => ({
     ...plan,
@@ -106,6 +109,16 @@ export default function ChatHubIntegrationPage() {
       description: "Maintain your brand voice and personality across all interactions."
     }
   ]
+
+  const handleGetStarted = (plan: any) => {
+    setSelectedIntegrationPlan(plan)
+    const formData = {
+      selectedPlan: plan,
+      serviceType: 'chathub_integration_selection'
+    }
+    sessionStorage.setItem('chathubSelection', JSON.stringify(formData))
+    router.push('/web-building/chathub-form')
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-orange-50/5 to-purange-100/10 dark:from-background dark:via-orange-900/20 dark:to-orange-800/10">
@@ -192,7 +205,10 @@ export default function ChatHubIntegrationPage() {
                       ))}
                     </div>
                     
-                    <Button className="w-full bg-gradient-to-r from-orange-600 to-blue-600 hover:from-orange-700 hover:to-blue-700">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-orange-600 to-blue-600 hover:from-orange-700 hover:to-blue-700"
+                      onClick={() => handleGetStarted(plan)}
+                    >
                       Get Started
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
@@ -327,7 +343,7 @@ export default function ChatHubIntegrationPage() {
                     <Link href="/web-building/quote">Get Free Quote</Link>
                   </Button>
                   <Button variant="outline" asChild>
-                    <Link href="/contact">Contact Us</Link>
+                    <Link href="/web-building/home?section=contact">Contact Us</Link>
                   </Button>
                 </div>
               </CardContent>

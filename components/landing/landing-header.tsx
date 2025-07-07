@@ -11,7 +11,7 @@ export function LandingHeader() {
   const pathname = usePathname()
   
   // Determine the sign in link based on current path
-  const signInLink = pathname === "/chathub" ? "/selection" : "/login"
+  const signInLink = pathname === "/chathub" ? "/" : "/login"
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 glass-dark">
       <div className="container flex h-16 items-center justify-between">

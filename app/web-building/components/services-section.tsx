@@ -95,7 +95,7 @@ export function ServicesSection({ setActiveSection }: ServicesSectionProps) {
               <Button 
                 size="lg" 
                 className="w-full"
-                onClick={() => setActiveSection("contact")}
+                onClick={() => window.location.href = '/web-building/consultation'}
               >
                 <Calendar className="mr-2 h-5 w-5" />
                 Book Free Consultation

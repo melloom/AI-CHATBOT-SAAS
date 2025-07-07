@@ -71,7 +71,16 @@ export default function LandingPage() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">Choose Your Service</p>
               </div>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center space-x-3">
+              <Button 
+                variant="outline" 
+                onClick={() => router.push('/login')}
+                className="bg-white/80 backdrop-blur-sm border-gray-200 hover:bg-white dark:bg-gray-800/80 dark:border-gray-700 dark:hover:bg-gray-800"
+              >
+                Login
+              </Button>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </header>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -28,6 +29,9 @@ import { hostingPlans as hostingPlansConfig, maintenanceServices as maintenanceS
 
 export default function HostingMaintenancePage() {
   const router = useRouter()
+
+  const [selectedHostingPlan, setSelectedHostingPlan] = useState<any>(null)
+  const [selectedMaintenanceService, setSelectedMaintenanceService] = useState<any>(null)
 
   const hostingPlans = hostingPlansConfig.map(plan => ({
     ...plan,
@@ -73,6 +77,26 @@ export default function HostingMaintenancePage() {
       description: "Content delivery network ensures fast loading times worldwide."
     }
   ]
+
+  const handleChooseHostingPlan = (plan: any) => {
+    setSelectedHostingPlan(plan)
+    const formData = {
+      selectedHostingPlan: plan,
+      serviceType: 'hosting_plan_selection'
+    }
+    sessionStorage.setItem('hostingSelection', JSON.stringify(formData))
+    router.push('/web-building/hosting-form')
+  }
+
+  const handleChooseMaintenanceService = (service: any) => {
+    setSelectedMaintenanceService(service)
+    const formData = {
+      selectedMaintenanceService: service,
+      serviceType: 'maintenance_service_selection'
+    }
+    sessionStorage.setItem('maintenanceSelection', JSON.stringify(formData))
+    router.push('/web-building/hosting-form')
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-purple-50/5 to-blue-100/10 dark:from-background dark:via-purple-900/20 dark:to-blue-800/10">
@@ -159,7 +183,10 @@ export default function HostingMaintenancePage() {
                       ))}
                     </div>
                     
-                    <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                      onClick={() => handleChooseHostingPlan(plan)}
+                    >
                       Choose Plan
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
@@ -209,8 +236,12 @@ export default function HostingMaintenancePage() {
                         <p className="text-sm text-muted-foreground">Monthly Price</p>
                         <p className="font-semibold text-foreground">{service.price}</p>
                       </div>
-                      <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
-                        Get Started
+                      <Button 
+                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                        onClick={() => handleChooseMaintenanceService(service)}
+                      >
+                        Choose Service
+                        <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </div>
                   </CardContent>

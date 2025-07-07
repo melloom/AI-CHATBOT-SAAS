@@ -43,7 +43,7 @@ export default function SitemapPage() {
         { name: "Contact", url: "/contact", description: "Get in touch with us" },
         { name: "FAQ", url: "/faq", description: "Frequently asked questions" },
         { name: "Blog", url: "/blog", description: "Our blog and insights" },
-        { name: "Selection", url: "/selection", description: "Choose your plan or service" },
+        { name: "Selection", url: "/", description: "Choose your plan or service" },
         { name: "Privacy Policy", url: "/privacy", description: "How we protect your data" },
         { name: "Terms of Service", url: "/terms", description: "Terms and conditions of use" },
         { name: "Cookie Policy", url: "/cookies", description: "How we use cookies" }

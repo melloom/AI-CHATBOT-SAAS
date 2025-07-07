@@ -59,7 +59,7 @@ export default function BillingPage() {
                   {subscription?.status || "Active"}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground mt-1">{subscription?.price || "$79/month"}</p>
+              <p className="text-sm text-muted-foreground mt-1">{subscription?.price || "$299/month"}</p>
             </div>
             <div>
               <div className="flex items-center space-x-2">
@@ -170,9 +170,9 @@ export default function BillingPage() {
         <CardContent>
           <div className="space-y-4">
             {[
-              { date: "Dec 15, 2023", amount: "$79.00", status: "Paid", invoice: "INV-001" },
-              { date: "Nov 15, 2023", amount: "$79.00", status: "Paid", invoice: "INV-002" },
-              { date: "Oct 15, 2023", amount: "$79.00", status: "Paid", invoice: "INV-003" },
+              { date: "Dec 15, 2023", amount: "$299.00", status: "Paid", invoice: "INV-001" },
+              { date: "Nov 15, 2023", amount: "$299.00", status: "Paid", invoice: "INV-002" },
+              { date: "Oct 15, 2023", amount: "$299.00", status: "Paid", invoice: "INV-003" },
             ].map((payment, index) => (
               <div key={index} className="flex items-center justify-between py-2 border-b last:border-b-0">
                 <div>

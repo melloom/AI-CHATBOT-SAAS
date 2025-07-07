@@ -120,9 +120,41 @@ export default function ContactPage() {
       console.log('No integration parameter found in URL')
     }
 
-    // Check for personal AI assistant selection and demo requests
+    // Check for business services requests
     const service = searchParams.get('service')
-    if (service === 'personal-ai-assistant') {
+    const price = searchParams.get('price')
+    const type = searchParams.get('type')
+    const source = searchParams.get('source')
+    
+    if (source === 'business-services' && service) {
+      setFormData(prev => ({
+        ...prev,
+        service: 'business-services',
+        subject: `Business Service Request: ${service}`,
+        message: `I'm interested in the following business service:
+
+Service: ${service}
+Price: ${price || 'Contact for pricing'}
+
+I would like to discuss this service in detail and understand how it can benefit my business. Please contact me to discuss the next steps, implementation details, and any additional requirements.
+
+Please provide more information about the process, timeline, and what I can expect.`
+      }))
+    } else if (source === 'custom-development' && service) {
+      setFormData(prev => ({
+        ...prev,
+        service: 'web-development',
+        subject: `Custom Development Request: ${service}`,
+        message: `I'm interested in the following custom development service:
+
+Service: ${service}
+Price: ${price || 'Contact for pricing'}
+
+I would like to discuss this project in detail and understand the development process. Please contact me to discuss the requirements, timeline, and next steps.
+
+Please provide more information about the development process, technologies that will be used, and what I can expect.`
+      }))
+    } else if (service === 'personal-ai-assistant') {
       const storedPlan = localStorage.getItem('selectedPersonalAIPlan')
       const storedAddons = localStorage.getItem('personalAIAddons')
       const contactData = localStorage.getItem('personalAIContactData')
@@ -221,6 +253,7 @@ Please contact me to discuss implementation details and get started.`
     { value: 'web-development', label: 'Web Development' },
     { value: 'chatbot-integration', label: 'Chatbot Integration' },
     { value: 'personal-ai-assistant', label: 'Personal AI Assistant' },
+    { value: 'business-services', label: 'Business & Legal Services' },
     { value: 'demo', label: 'Demo Request' },
     { value: 'hosting', label: 'Hosting Services' },
     { value: 'maintenance', label: 'Website Maintenance' },

@@ -96,6 +96,87 @@ export default function WebBuildingHomePage() {
     formData.append('message', contactForm.message)
     formData.append('selected_service', contactForm.serviceType)
     
+    // Add additional service selection data if available
+    const serviceSelection = sessionStorage.getItem('serviceSelection')
+    if (serviceSelection) {
+      try {
+        const data = JSON.parse(serviceSelection)
+        formData.append('business_service_name', data.selectedService.name)
+        formData.append('business_service_price', data.selectedService.price)
+        formData.append('business_service_description', data.selectedService.description)
+        formData.append('business_service_type', 'business_service_consultation')
+        // Clear the sessionStorage after using it
+        sessionStorage.removeItem('serviceSelection')
+      } catch (error) {
+        console.error('Error parsing service selection:', error)
+      }
+    }
+    
+    // Add pricing selection data if available
+    const pricingSelection = sessionStorage.getItem('pricingSelection')
+    if (pricingSelection) {
+      try {
+        const data = JSON.parse(pricingSelection)
+        formData.append('selected_plan', data.selectedPlan.name)
+        formData.append('selected_plan_price', data.selectedPlan.price)
+        formData.append('selected_addons', JSON.stringify(data.selectedAddons))
+        formData.append('total_price', data.totalPrice.toString())
+        formData.append('pricing_selection_type', 'web_development_quote')
+        // Clear the sessionStorage after using it
+        sessionStorage.removeItem('pricingSelection')
+      } catch (error) {
+        console.error('Error parsing pricing selection:', error)
+      }
+    }
+
+    // Add hosting selection data if available
+    const hostingSelection = sessionStorage.getItem('hostingSelection')
+    if (hostingSelection) {
+      try {
+        const data = JSON.parse(hostingSelection)
+        formData.append('hosting_plan_name', data.selectedHostingPlan.name)
+        formData.append('hosting_plan_price', data.selectedHostingPlan.price)
+        formData.append('hosting_plan_description', data.selectedHostingPlan.description)
+        formData.append('hosting_selection_type', 'hosting_plan_selection')
+        // Clear the sessionStorage after using it
+        sessionStorage.removeItem('hostingSelection')
+      } catch (error) {
+        console.error('Error parsing hosting selection:', error)
+      }
+    }
+
+    // Add maintenance selection data if available
+    const maintenanceSelection = sessionStorage.getItem('maintenanceSelection')
+    if (maintenanceSelection) {
+      try {
+        const data = JSON.parse(maintenanceSelection)
+        formData.append('maintenance_service_name', data.selectedMaintenanceService.name)
+        formData.append('maintenance_service_price', data.selectedMaintenanceService.price)
+        formData.append('maintenance_service_description', data.selectedMaintenanceService.description)
+        formData.append('maintenance_selection_type', 'maintenance_service_selection')
+        // Clear the sessionStorage after using it
+        sessionStorage.removeItem('maintenanceSelection')
+      } catch (error) {
+        console.error('Error parsing maintenance selection:', error)
+      }
+    }
+
+    // Add ChatHub selection data if available
+    const chathubSelection = sessionStorage.getItem('chathubSelection')
+    if (chathubSelection) {
+      try {
+        const data = JSON.parse(chathubSelection)
+        formData.append('chathub_plan_name', data.selectedPlan.name)
+        formData.append('chathub_plan_price', data.selectedPlan.price)
+        formData.append('chathub_plan_description', data.selectedPlan.description)
+        formData.append('chathub_selection_type', 'chathub_integration_selection')
+        // Clear the sessionStorage after using it
+        sessionStorage.removeItem('chathubSelection')
+      } catch (error) {
+        console.error('Error parsing ChatHub selection:', error)
+      }
+    }
+    
     // Submit to Formspree
     fetch('https://formspree.io/f/mgvylnze', {
       method: 'POST',
@@ -152,6 +233,139 @@ export default function WebBuildingHomePage() {
       setActiveSection(section)
     }
 
+    // Check for pricing selection data from sessionStorage
+    const pricingSelection = sessionStorage.getItem('pricingSelection')
+    const serviceSelection = sessionStorage.getItem('serviceSelection')
+    
+    if (pricingSelection && section === 'contact') {
+      try {
+        const data = JSON.parse(pricingSelection)
+        const selectedPlan = data.selectedPlan
+        const selectedAddons = data.selectedAddons
+        const totalPrice = data.totalPrice
+
+        // Pre-fill the contact form with pricing data
+        setContactForm(prev => ({
+          ...prev,
+          serviceType: 'web_development_quote',
+          websiteType: selectedPlan.name,
+          budget: `$${totalPrice.toLocaleString()}`,
+          message: `Selected Plan: ${selectedPlan.name} (${selectedPlan.price})
+${selectedAddons.length > 0 ? `\nSelected Add-ons:\n${selectedAddons.map((addon: any) => `- ${addon.name} (${addon.price})`).join('\n')}` : ''}
+\nTotal Estimated Cost: $${totalPrice.toLocaleString()}
+\nTimeline: ${selectedPlan.timeline}`
+        }))
+
+        // Clear the sessionStorage after reading
+        sessionStorage.removeItem('pricingSelection')
+      } catch (error) {
+        console.error('Error parsing pricing selection:', error)
+      }
+    }
+
+    // Check for service selection data from sessionStorage
+    if (serviceSelection && section === 'contact') {
+      try {
+        const data = JSON.parse(serviceSelection)
+        const selectedService = data.selectedService
+
+        // Pre-fill the contact form with service data
+        setContactForm(prev => ({
+          ...prev,
+          serviceType: 'business_service_consultation',
+          websiteType: selectedService.name,
+          budget: selectedService.price,
+          message: `Business Service Request: ${selectedService.name}
+\nService Description: ${selectedService.description}
+\nPrice: ${selectedService.price}
+\nService Type: Business & Legal Services`
+        }))
+
+        // Clear the sessionStorage after reading
+        sessionStorage.removeItem('serviceSelection')
+      } catch (error) {
+        console.error('Error parsing service selection:', error)
+      }
+    }
+
+    // Check for hosting selection data from sessionStorage
+    const hostingSelection = sessionStorage.getItem('hostingSelection')
+    if (hostingSelection && section === 'contact') {
+      try {
+        const data = JSON.parse(hostingSelection)
+        const selectedHostingPlan = data.selectedHostingPlan
+
+        // Pre-fill the contact form with hosting data
+        setContactForm(prev => ({
+          ...prev,
+          serviceType: 'hosting_plan_selection',
+          websiteType: selectedHostingPlan.name,
+          budget: selectedHostingPlan.price,
+          message: `Hosting Plan Request: ${selectedHostingPlan.name}
+\nPlan Description: ${selectedHostingPlan.description}
+\nPrice: ${selectedHostingPlan.price}
+\nService Type: Hosting & Maintenance`
+        }))
+
+        // Clear the sessionStorage after reading
+        sessionStorage.removeItem('hostingSelection')
+      } catch (error) {
+        console.error('Error parsing hosting selection:', error)
+      }
+    }
+
+    // Check for maintenance selection data from sessionStorage
+    const maintenanceSelection = sessionStorage.getItem('maintenanceSelection')
+    if (maintenanceSelection && section === 'contact') {
+      try {
+        const data = JSON.parse(maintenanceSelection)
+        const selectedMaintenanceService = data.selectedMaintenanceService
+
+        // Pre-fill the contact form with maintenance data
+        setContactForm(prev => ({
+          ...prev,
+          serviceType: 'maintenance_service_selection',
+          websiteType: selectedMaintenanceService.name,
+          budget: selectedMaintenanceService.price,
+          message: `Maintenance Service Request: ${selectedMaintenanceService.name}
+\nService Description: ${selectedMaintenanceService.description}
+\nPrice: ${selectedMaintenanceService.price}
+\nService Type: Hosting & Maintenance`
+        }))
+
+        // Clear the sessionStorage after reading
+        sessionStorage.removeItem('maintenanceSelection')
+      } catch (error) {
+        console.error('Error parsing maintenance selection:', error)
+      }
+    }
+
+    // Check for ChatHub selection data from sessionStorage
+    const chathubSelection = sessionStorage.getItem('chathubSelection')
+    if (chathubSelection && section === 'contact') {
+      try {
+        const data = JSON.parse(chathubSelection)
+        const selectedPlan = data.selectedPlan
+
+        // Pre-fill the contact form with ChatHub data
+        setContactForm(prev => ({
+          ...prev,
+          serviceType: 'chathub_integration_selection',
+          websiteType: selectedPlan.name,
+          budget: selectedPlan.price,
+          message: `ChatHub Integration Request: ${selectedPlan.name}
+\nPlan Description: ${selectedPlan.description}
+\nPrice: ${selectedPlan.price}
+\nService Type: AI Chatbot Integration`
+        }))
+
+        // Clear the sessionStorage after reading
+        sessionStorage.removeItem('chathubSelection')
+      } catch (error) {
+        console.error('Error parsing ChatHub selection:', error)
+      }
+    }
+
     // Animate stats
     const timer = setTimeout(() => {
       setStats({ websites: 50, clients: 25, years: 3, support: 24 })
@@ -164,7 +378,7 @@ export default function WebBuildingHomePage() {
     // Clear the preference and redirect to selection
     localStorage.removeItem('userServicePreference')
     localStorage.removeItem('hasVisitedSelection')
-    router.push('/selection')
+    router.push('/')
   }
 
   const sections = [
@@ -365,11 +579,7 @@ export default function WebBuildingHomePage() {
                       size="lg" 
                       className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg"
                       onClick={() => {
-                        handleSectionChange('contact');
-                        setContactForm({
-                          ...contactForm,
-                          serviceType: 'free_consultation'
-                        });
+                        router.push('/web-building/consultation');
                       }}
                     >
                       <Calendar className="w-5 h-5 mr-2" />
@@ -462,6 +672,36 @@ export default function WebBuildingHomePage() {
                             onClick={() => setShowQuoteWidget(true)}
                           >
                             Get Quote
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        ) : action.title === "Book Consultation" ? (
+                          <Button 
+                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                            onClick={() => {
+                              router.push('/web-building/consultation');
+                            }}
+                          >
+                            Get Started
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        ) : action.title === "Technical Review" ? (
+                          <Button 
+                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                            onClick={() => {
+                              router.push('/web-building/custom-development');
+                            }}
+                          >
+                            Get Started
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        ) : action.title === "Support & Maintenance" ? (
+                          <Button 
+                            className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
+                            onClick={() => {
+                              router.push('/web-building/hosting-maintenance');
+                            }}
+                          >
+                            Get Started
                             <ArrowRight className="w-4 h-4 ml-2" />
                           </Button>
                         ) : (
@@ -813,16 +1053,11 @@ export default function WebBuildingHomePage() {
               console.log('Getting detailed quote:', data)
               // You can add form submission logic here
             } else if (data.action === 'book_consultation') {
-                          // Handle consultation booking
-            console.log('Booking consultation:', data)
-            // Scroll to contact section
-            handleSectionChange('contact')
-            // Pre-fill form with quote data
-            setContactForm({
-              ...contactForm,
-              serviceType: 'quote_consultation',
-              message: `Quote Request: ${data.quote.totalPrice.toLocaleString()} for ${data.websiteType || 'website'} project. Features: ${data.features.join(', ')}. Timeline: ${data.timeline}.`
-            })
+              // Handle consultation booking
+              console.log('Booking consultation:', data)
+              // Store quote data and redirect to consultation page
+              sessionStorage.setItem('quoteData', JSON.stringify(data))
+              router.push('/web-building/consultation')
             }
           }}
         />

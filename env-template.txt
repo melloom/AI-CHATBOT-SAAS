@@ -1,19 +1,11 @@
-# Copy this file to .env.local and fill in your actual Firebase credentials
-# IMPORTANT: Never commit .env.local to version control
+# Copy these environment variables to your .env.local file
 
 # Firebase Admin SDK Configuration
-FIREBASE_PRIVATE_KEY_ID=your_private_key_id_here
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_CONTENT_HERE\n-----END PRIVATE KEY-----\n"
-FIREBASE_CLIENT_EMAIL=your_service_account_email@your-project.iam.gserviceaccount.com
-FIREBASE_CLIENT_ID=your_client_id_here
-FIREBASE_CLIENT_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/your_service_account_email%40your-project.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY_ID=503cc1f52e919ca2de22a7e3362f8f107e070c97
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDnkR3SDtmotocs\nMlvYmR0zUvqLwaM6hN28RsWThUFE4WcLel1TMI2N1Nj3KjRKtyQpvyS6aT36bYGa\nCa3Set0UKbK491QF2y+n1Z+GuzPgKqDvoH3vrxQWDqANQAAK/Emgh4HIFXa6VEaX\nBJOfy/nRpVxkCHJuhSpdvEFdY8HPEOnFvGQZU4vwU++N2tV95KAmFY6FN84SDj4t\n4HJ+CGdIlZQc5b5zSFSx8lHJoUsh8sTq0e6mRalx6hghOxTV+PjNlfzjOgibgS4m\nPAtoG33pm/uhcxjbMDBpeNM8osW0XiaJp8Z9PFE2lX89HuZ7zEf90DmGqazFsXcN\nObwn7Gx/AgMBAAECggEAZ17k8HnXmRROGCEs1e5X1irzFEMvAfcA4sS2+ykPn1d9\nf+ayVWoFrqw25HLvH/FMT+R3WU2UsL+EjMZIVX6qRQ9uLFqgI/MZ/XKDwYm82RM+\nf2nl/gJqVYRW10NcIYtItMP43+AQ/ZGUZ2LQIZPVI8yNB0ysBIEmjex1Q2K+SBe7\nsQPNg1bJtN5kaliNl8jYZqsMD5IXQwwYYlu1/akjkgZCKLf07bvrL+nDPYKUKKFG\nHjTp5p7luFUNUnUgSQD/SC5PFwit5oSynsUvEZrzYjE40nRXSS+Mw5yYFX00rm7I\nD6z8yqsQKCXY1RD2K3MyB0lBePfIck2IF1tlUkKQ1QKBgQD9GXfyUs1bztmmZes2\nXMBM9ndQ4eLNrPMM08lrRGCDgW0hCkiiG7y1T0R8ApXKfkBZ66ob7I/hLzgw2bsU\nASDO4qjySEUEn3Xdx9c0YGapppdrG2mGkx73alPDznLjqfgVK7g/r/LVWyFC0bMI\nktz070HfphJon4uuw7AH7jsH6wKBgQDqOHn+KaojlegO5cPcZb8MrKeDqI4ET0DM\nci8AY0j/VhFyfbJj/4IPGr3flZ1v9Yy0nn9Sn0/GWdVOe4WqxOqAlLuZSa4fwKQA\nA2P4f4owJ2DkDwDGaq1JwJ+t3/VZdRXDvv7kiSpuCvFj3PuPm14IDnqsX/7s3vDO\nzY+hgtW8vQKBgQDmL8ebKBuFJ/djEsZ9RpXOaUnS0d3IWUcjn2pMmH9+mrN5nTS5\n2qgh7dnHP0KkS3aTUXYAt4GTt7JPG3a9ltkTz6j/0SKUNcKo1huvkw1Ltit4ShIL\nRrqfIqDUMGrlC6yI9J45rfgYey0g7D77yTYTvZYXpZ6QcKpFY8wxKkWdyQKBgQCK\nIUiAxh2a4vt6XbLGthKX7PLVyIAItpymdeiWN/eC7kVX2h1sr/EJ62FzDI9Oyedz\nVc4M8ftgJPaRVHOeJIeP0SdZ3YQdIcUWZOl+UekzQOX5WYfBfIQ57Km/J0dQvKZb\nTLaSHPqy7y0xEdAh/yTTZ4adRffXxhsKO1yribd3mQKBgExKiEoGlRPybhuDazvM\nvj6hK4CFKkmh9WAipCpUKbCc/5D5gXTxYk0RT6DwkNnqV+KzdRDiLhenahwKTZ0M\n+SArZHzliYcBUAhGHs4SZaJICrQQ3UN1mlOB18kcOWF1ZurLajCjdEbKac01OrGy\nYI1Vrw4NoU6mimH6drfjbwmd\n-----END PRIVATE KEY-----\n"
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@chathub-3f128.iam.gserviceaccount.com
+FIREBASE_CLIENT_ID=111107361786581220517
+FIREBASE_CLIENT_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40chathub-3f128.iam.gserviceaccount.com
 
 # Firebase Project Configuration
-FIREBASE_PROJECT_ID=your_project_id_here
-
-# Next.js Configuration
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your_nextauth_secret_here
-
-# Optional: Analytics (if using)
-NEXT_PUBLIC_ANALYTICS_ID=your_analytics_id_here 
+FIREBASE_PROJECT_ID=chathub-3f128 

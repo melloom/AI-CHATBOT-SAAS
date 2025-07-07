@@ -66,7 +66,18 @@ export default function SignUpPage() {
       const platform = redirect || 'general'
       
       console.log("Creating user with email:", email, "company:", companyName, "accountType:", accountType, "platform:", platform)
-      await createUserWithEmailAndPassword(email, password, companyName, accountType, platform)
+      const result = await createUserWithEmailAndPassword(email, password, companyName, accountType, platform)
+      
+      // Check if this was an existing user getting platform access
+      if (result.user && !result.user.uid.includes('firebase')) {
+        // This is an existing user - they need to sign in
+        toast({
+          title: "Platform access added!",
+          description: `You now have access to ${platform}. Please sign in to continue.`,
+        })
+        router.push("/login")
+        return
+      }
       
       if (accountType === 'personal') {
         toast({
@@ -116,7 +127,18 @@ export default function SignUpPage() {
       const platform = redirect || 'general'
       
       console.log("Starting Microsoft signup...", "accountType:", accountType, "platform:", platform)
-      await signInWithMicrosoft(accountType, platform)
+      const result = await signInWithMicrosoft(accountType, platform)
+      
+      // Check if this was an existing user getting platform access
+      if (result.user && !result.user.uid.includes('firebase')) {
+        // This is an existing user - they need to sign in
+        toast({
+          title: "Platform access added!",
+          description: `You now have access to ${platform}. Please sign in to continue.`,
+        })
+        router.push("/login")
+        return
+      }
       
       if (accountType === 'personal') {
         toast({

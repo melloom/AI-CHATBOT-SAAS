@@ -29,4 +29,3 @@ chathub-3f128-firebase-adminsdk-fbsvc-503cc1f52e
 *.tsbuildinfo
 next-env.d.ts
 .vercel
-.env.local

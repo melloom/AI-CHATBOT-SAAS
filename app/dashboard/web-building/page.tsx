@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -44,6 +45,7 @@ import {
   Wrench
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { webDevelopmentPlans, webDevelopmentAddons } from "@/lib/pricing-config"
 
 interface Service {
   id: string
@@ -67,75 +69,25 @@ interface PortfolioItem {
   github?: string
 }
 
-const services: Service[] = [
-  {
-    id: "landing-page",
-    title: "Landing Page",
-    description: "High-converting landing pages that drive results",
-    icon: Globe,
-    features: [
-      "Responsive design",
-      "SEO optimized",
-      "Contact forms",
-      "Analytics integration",
-      "Fast loading",
-      "Mobile-first approach"
-    ],
-    price: "$500 - $1,500",
-    duration: "1-2 weeks"
-  },
-  {
-    id: "ecommerce",
-    title: "E-commerce Website",
-    description: "Complete online stores with payment processing",
-    icon: ShoppingCart,
-    features: [
-      "Product catalog",
-      "Shopping cart",
-      "Payment integration",
-      "Order management",
-      "Inventory tracking",
-      "Customer accounts"
-    ],
-    price: "$2,000 - $5,000",
-    duration: "3-6 weeks",
-    popular: true
-  },
-  {
-    id: "business-website",
-    title: "Business Website",
-    description: "Professional websites for businesses of all sizes",
-    icon: Building2,
-    features: [
-      "Multiple pages",
-      "Blog section",
-      "Contact forms",
-      "SEO optimization",
-      "Content management",
-      "Social media integration"
-    ],
-    price: "$1,500 - $3,500",
-    duration: "2-4 weeks"
-  },
-  {
-    id: "web-app",
-    title: "Web Application",
-    description: "Custom web applications with advanced functionality",
-    icon: Code,
-    features: [
-      "Custom functionality",
-      "User authentication",
-      "Database integration",
-      "API development",
-      "Real-time features",
-      "Scalable architecture"
-    ],
-    price: "$5,000 - $15,000",
-    duration: "6-12 weeks"
-  },
+const services: Service[] = webDevelopmentPlans.map(plan => ({
+  id: plan.name.toLowerCase().replace(/\s+/g, '-'),
+  title: plan.name,
+  description: plan.description,
+  icon: plan.name.includes("Basic") ? Globe : 
+        plan.name.includes("Professional") ? Star :
+        plan.name.includes("E-commerce") ? ShoppingCart : 
+        plan.name.includes("Enterprise") ? Code : Building2,
+  features: plan.features,
+  price: plan.price,
+  duration: plan.timeline || "Varies",
+  popular: plan.popular
+}))
+
+// Add additional services from addons
+const additionalServices: Service[] = [
   {
     id: "mobile-app",
-    title: "Mobile App",
+    title: "Mobile App Development",
     description: "Native and cross-platform mobile applications",
     icon: Smartphone,
     features: [
@@ -146,7 +98,7 @@ const services: Service[] = [
       "App store submission",
       "Maintenance support"
     ],
-    price: "$3,000 - $10,000",
+    price: "$8,000+",
     duration: "8-16 weeks"
   },
   {
@@ -162,7 +114,7 @@ const services: Service[] = [
       "Backup management",
       "24/7 support"
     ],
-    price: "$100 - $500/month",
+    price: "$50/month",
     duration: "Ongoing"
   }
 ]
@@ -170,58 +122,13 @@ const services: Service[] = [
 const portfolioItems: PortfolioItem[] = [
   {
     id: "1",
-    title: "TechCorp Solutions",
-    description: "Modern business website with blog and contact forms",
+    title: "Portfolio Coming Soon",
+    description: "Our portfolio is currently being updated with our latest projects. We're working on showcasing our best work to demonstrate our expertise in modern web development.",
     image: "/placeholder.jpg",
-    category: "Business Website",
-    technologies: ["React", "Next.js", "Tailwind CSS", "Vercel"],
-    link: "https://techcorp.com",
-    github: "https://github.com/techcorp"
-  },
-  {
-    id: "2",
-    title: "E-commerce Plus",
-    description: "Full-featured online store with payment processing",
-    image: "/placeholder.jpg",
-    category: "E-commerce",
-    technologies: ["React", "Stripe", "MongoDB", "AWS"],
-    link: "https://ecommerceplus.com"
-  },
-  {
-    id: "3",
-    title: "StartupXYZ",
-    description: "Landing page for startup with lead generation",
-    image: "/placeholder.jpg",
-    category: "Landing Page",
-    technologies: ["Vue.js", "Netlify", "Mailchimp", "Google Analytics"],
-    link: "https://startupxyz.com"
-  },
-  {
-    id: "4",
-    title: "HealthCare App",
-    description: "Mobile app for healthcare providers",
-    image: "/placeholder.jpg",
-    category: "Mobile App",
-    technologies: ["React Native", "Firebase", "Node.js", "MongoDB"],
-    github: "https://github.com/healthcare-app"
-  },
-  {
-    id: "5",
-    title: "TaskMaster Pro",
-    description: "Web application for project management",
-    image: "/placeholder.jpg",
-    category: "Web App",
-    technologies: ["Angular", "Express.js", "PostgreSQL", "Docker"],
-    link: "https://taskmasterpro.com"
-  },
-  {
-    id: "6",
-    title: "Restaurant Booking",
-    description: "Online reservation system for restaurants",
-    image: "/placeholder.jpg",
-    category: "Web App",
-    technologies: ["React", "Node.js", "MySQL", "Stripe"],
-    link: "https://restaurant-booking.com"
+    category: "In Development",
+    technologies: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+    link: "#",
+    github: "#"
   }
 ]
 
@@ -375,7 +282,7 @@ export default function WebBuildingPage() {
 
         <TabsContent value="services" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {services.map((service) => (
+            {[...services, ...additionalServices].map((service) => (
               <Card key={service.id} className={`relative overflow-hidden ${service.popular ? 'ring-2 ring-purple-500' : ''}`}>
                 {service.popular && (
                   <div className="absolute top-4 right-4">
@@ -428,52 +335,102 @@ export default function WebBuildingPage() {
         </TabsContent>
 
         <TabsContent value="portfolio" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {portfolioItems.map((item) => (
-              <Card key={item.id} className="overflow-hidden">
-                <div className="aspect-video bg-gradient-to-br from-purple-100 to-pink-100 relative">
-                  <img 
-                    src={item.image} 
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-2 right-2">
-                    <Badge variant="secondary">{item.category}</Badge>
-                  </div>
+          {/* Main Coming Soon Section */}
+          <div className="text-center py-16">
+            <div className="max-w-2xl mx-auto">
+              {/* Large Icon */}
+              <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl">
+                <Clock className="w-12 h-12 text-white" />
+              </div>
+              
+              {/* Title */}
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+                Portfolio Coming Soon
+              </h2>
+              
+              {/* Description */}
+              <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+                We're currently updating our portfolio with our latest projects and case studies. 
+                Our team is working hard to showcase our best work and demonstrate our expertise 
+                in modern web development.
+              </p>
+              
+              {/* Status Badge */}
+              <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-800 dark:text-blue-200 px-6 py-3 rounded-full font-medium mb-8">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                <span>In Development</span>
+              </div>
+              
+              {/* Technologies Preview */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  Technologies We Work With
+                </h3>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {["React", "Next.js", "TypeScript", "Tailwind CSS", "Node.js", "Firebase", "PostgreSQL", "Docker"].map((tech) => (
+                    <Badge key={tech} variant="outline" className="text-sm">
+                      {tech}
+                    </Badge>
+                  ))}
                 </div>
-                <CardHeader>
-                  <CardTitle className="text-lg">{item.title}</CardTitle>
-                  <CardDescription>{item.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex flex-wrap gap-2">
-                    {item.technologies.map((tech) => (
-                      <Badge key={tech} variant="outline" className="text-xs">
-                        {tech}
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex space-x-2">
-                    {item.link && (
-                      <Button size="sm" variant="outline" asChild>
-                        <a href={item.link} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-4 w-4 mr-1" />
-                          Live Demo
-                        </a>
-                      </Button>
-                    )}
-                    {item.github && (
-                      <Button size="sm" variant="outline" asChild>
-                        <a href={item.github} target="_blank" rel="noopener noreferrer">
-                          <Github className="h-4 w-4 mr-1" />
-                          Code
-                        </a>
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+              </div>
+              
+              {/* Contact CTA */}
+              <div className="bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-900/20 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Ready to Start Your Project?
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  Don't wait for our portfolio to be ready. Let's discuss your project and see how we can help bring your vision to life.
+                </p>
+                <Button size="lg" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700" asChild>
+                  <Link href="/contact">
+                    <MessageSquare className="w-5 h-5 mr-2" />
+                    Get in Touch
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Expertise Section */}
+          <div className="mt-12 bg-gradient-to-r from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-900/20 rounded-xl p-8">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Our Expertise</h3>
+              <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                We specialize in modern web development with a focus on performance, user experience, and scalable solutions.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Code className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 dark:text-white">Modern Frameworks</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">React, Next.js, Vue.js</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Palette className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 dark:text-white">UI/UX Design</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Responsive, Accessible</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Zap className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 dark:text-white">Performance</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Fast, Optimized</p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 dark:text-white">Security</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Best Practices</p>
+              </div>
+            </div>
           </div>
         </TabsContent>
 

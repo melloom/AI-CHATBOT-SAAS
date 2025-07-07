@@ -58,7 +58,7 @@ export function PricingSection({ setActiveSection }: PricingSectionProps) {
                 <Button 
                   size="lg" 
                   className="w-full bg-green-600 hover:bg-green-700"
-                  onClick={() => setActiveSection("contact")}
+                  onClick={() => window.location.href = '/web-building/consultation'}
                 >
                   <Calendar className="mr-2 h-5 w-5" />
                   Book Free Consultation
@@ -104,7 +104,16 @@ export function PricingSection({ setActiveSection }: PricingSectionProps) {
               </ul>
               <Button 
                 className="w-full mt-6"
-                onClick={() => setActiveSection("contact")}
+                onClick={() => {
+                  const planData = {
+                    planName: "Basic Website",
+                    price: "$1,500 - $3,000",
+                    description: "Perfect for small businesses",
+                    features: ["5-8 Pages", "Responsive Design", "Contact Form", "Basic SEO", "Content Management", "1 Month Support"]
+                  }
+                  sessionStorage.setItem('pricingPlanSelection', JSON.stringify(planData))
+                  window.location.href = '/web-building/consultation'
+                }}
               >
                 Get Started
               </Button>
@@ -150,7 +159,16 @@ export function PricingSection({ setActiveSection }: PricingSectionProps) {
               </ul>
               <Button 
                 className="w-full mt-6"
-                onClick={() => setActiveSection("contact")}
+                onClick={() => {
+                  const planData = {
+                    planName: "Professional Website",
+                    price: "$3,000 - $8,000",
+                    description: "Most popular choice",
+                    features: ["10-15 Pages", "Advanced CMS", "Blog Section", "Advanced SEO", "Analytics Setup", "3 Months Support", "Performance Optimization"]
+                  }
+                  sessionStorage.setItem('pricingPlanSelection', JSON.stringify(planData))
+                  window.location.href = '/web-building/consultation'
+                }}
               >
                 Get Started
               </Button>
@@ -196,7 +214,16 @@ export function PricingSection({ setActiveSection }: PricingSectionProps) {
               </ul>
               <Button 
                 className="w-full mt-6"
-                onClick={() => setActiveSection("contact")}
+                onClick={() => {
+                  const planData = {
+                    planName: "E-commerce Website",
+                    price: "$5,000 - $15,000",
+                    description: "Complete online store",
+                    features: ["Unlimited Products", "Payment Processing", "Inventory Management", "Order Tracking", "Customer Accounts", "6 Months Support", "Security Features"]
+                  }
+                  sessionStorage.setItem('pricingPlanSelection', JSON.stringify(planData))
+                  window.location.href = '/web-building/consultation'
+                }}
               >
                 Get Started
               </Button>
@@ -220,7 +247,7 @@ export function PricingSection({ setActiveSection }: PricingSectionProps) {
                 <Button 
                   variant="outline" 
                   className="w-full"
-                  onClick={() => setActiveSection("contact")}
+                  onClick={() => window.location.href = '/web-building/consultation'}
                 >
                   Book Consultation
                 </Button>
@@ -239,7 +266,7 @@ export function PricingSection({ setActiveSection }: PricingSectionProps) {
                 <Button 
                   variant="outline" 
                   className="w-full"
-                  onClick={() => setActiveSection("contact")}
+                  onClick={() => window.location.href = '/web-building/hosting-maintenance'}
                 >
                   Subscribe
                 </Button>

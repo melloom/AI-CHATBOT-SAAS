@@ -7,7 +7,7 @@ import {
   User,
   OAuthProvider
 } from "firebase/auth"
-import { doc, setDoc, getDoc, addDoc, collection, getDocs, updateDoc } from "firebase/firestore"
+import { doc, setDoc, getDoc, addDoc, collection, getDocs, updateDoc, query, where } from "firebase/firestore"
 import { auth, db } from "./firebase"
 import { AutomatedNotificationService } from "./automated-notifications"
 
@@ -50,6 +50,61 @@ export const signInWithEmailAndPassword = async (email: string, password: string
 
 export const createUserWithEmailAndPassword = async (email: string, password: string, companyName?: string, accountType: 'business' | 'personal' = 'business', platform?: string) => {
   try {
+    // First, check if user already exists by email
+    const usersRef = collection(db, "users")
+    const q = query(usersRef, where("email", "==", email))
+    const querySnapshot = await getDocs(q)
+    
+    if (!querySnapshot.empty) {
+      // User already exists - add platform access to existing account
+      const existingUser = querySnapshot.docs[0]
+      const userData = existingUser.data() as any
+      const platforms = userData.platforms || {}
+      
+      // Check if user already has access to this platform
+      if (platform && platforms[platform]?.access) {
+        throw new Error(`You already have access to ${platform}. Please log in instead.`)
+      }
+      
+      // Add platform access to existing user
+      if (platform) {
+        // Determine if user already has any approved platform
+        const hasAnyApprovedPlatform = Object.keys(platforms).some(p => {
+          const plat = platforms[p]
+          return plat?.access && plat?.subscription?.status === 'active'
+        })
+        // For personal: always active. For business: if already approved platform, new is pending, don't change approvalStatus. If first business platform, set approvalStatus to pending.
+        let newPlatformStatus = 'pending'
+        if (accountType === 'personal') {
+          newPlatformStatus = 'active'
+        } else if (hasAnyApprovedPlatform) {
+          newPlatformStatus = 'pending'
+        } else {
+          newPlatformStatus = 'pending'
+        }
+        platforms[platform] = {
+          access: true,
+          registeredAt: new Date().toISOString(),
+          subscription: {
+            plan: 'Free',
+            status: newPlatformStatus
+          }
+        }
+      }
+      
+      // Update existing user document
+      await updateDoc(doc(db, "users", existingUser.id), {
+        platforms,
+        updatedAt: new Date().toISOString()
+      })
+      
+      console.log(`Platform access added to existing user for ${platform}:`, existingUser.id)
+      
+      // Return the existing user (we'll need to sign them in)
+      return { user: { uid: existingUser.id, email } }
+    }
+    
+    // User doesn't exist - create new account
     const result = await firebaseCreateUser(auth, email, password)
     
     if (result.user) {
@@ -180,8 +235,6 @@ export const createUserWithEmailAndPassword = async (email: string, password: st
   }
 }
 
-
-
 export const sendPasswordResetEmail = async (email: string) => {
   try {
     await firebaseSendPasswordReset(auth, email)
@@ -250,6 +303,59 @@ export const signInWithMicrosoft = async (accountType: 'business' | 'personal' =
     // Check if user profile exists, if not create it
     const userDoc = await getDoc(doc(db, "users", result.user.uid));
     if (!userDoc.exists()) {
+      // Check if user already exists by email
+      const usersRef = collection(db, "users")
+      const q = query(usersRef, where("email", "==", result.user.email))
+      const querySnapshot = await getDocs(q)
+      
+      if (!querySnapshot.empty) {
+        // User already exists - add platform access to existing account
+        const existingUser = querySnapshot.docs[0]
+        const userData = existingUser.data() as any
+        const platforms = userData.platforms || {}
+        
+        // Check if user already has access to this platform
+        if (platform && platforms[platform]?.access) {
+          throw new Error(`You already have access to ${platform}. Please log in instead.`)
+        }
+        
+        // Add platform access to existing user
+        if (platform) {
+          // Determine if user already has any approved platform
+          const hasAnyApprovedPlatform = Object.keys(platforms).some(p => {
+            const plat = platforms[p]
+            return plat?.access && plat?.subscription?.status === 'active'
+          })
+          // For personal: always active. For business: if already approved platform, new is pending, don't change approvalStatus. If first business platform, set approvalStatus to pending.
+          let newPlatformStatus = 'pending'
+          if (accountType === 'personal') {
+            newPlatformStatus = 'active'
+          } else if (hasAnyApprovedPlatform) {
+            newPlatformStatus = 'pending'
+          } else {
+            newPlatformStatus = 'pending'
+          }
+          platforms[platform] = {
+            access: true,
+            registeredAt: new Date().toISOString(),
+            subscription: {
+              plan: 'Free',
+              status: newPlatformStatus
+            }
+          }
+        }
+        
+        // Update existing user document
+        await updateDoc(doc(db, "users", existingUser.id), {
+          platforms,
+          updatedAt: new Date().toISOString()
+        })
+        
+        console.log(`Platform access added to existing user for ${platform}:`, existingUser.id)
+        
+        // Return the existing user
+        return { user: { uid: existingUser.id, email: result.user.email } }
+      }
       if (accountType === 'business') {
         // Create business account with company approval
         const defaultCompanyName = `Company for ${result.user.email?.split('@')[0] || 'User'}`
