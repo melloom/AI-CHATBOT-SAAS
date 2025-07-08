@@ -41,7 +41,9 @@ export function AppHeader() {
   }
 
   // Determine which company name to display
-  const displayCompanyName = impersonatedCompany?.companyName || profile?.companyName || user?.displayName
+  const displayCompanyName = profile?.accountType === 'personal' 
+    ? "Personal AI Account" 
+    : (impersonatedCompany?.companyName || profile?.companyName || user?.displayName)
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 glass-dark">

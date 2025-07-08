@@ -65,7 +65,17 @@ export function ChatbotSection({ setActiveSection }: ChatbotSectionProps) {
               </ul>
               <Button 
                 className="w-full"
-                onClick={() => setActiveSection("contact")}
+                onClick={() => {
+                  const planData = {
+                    planName: "ChatHub Starter",
+                    price: "$49/month",
+                    description: "Perfect for small businesses getting started",
+                    features: ["Up to 3 chatbots", "1,000 conversations/month", "Basic analytics", "Email support", "Standard templates", "Mobile responsive"],
+                    icon: "Bot"
+                  }
+                  sessionStorage.setItem('chathubSelection', JSON.stringify(planData))
+                  window.location.href = '/web-building/chathub-form'
+                }}
               >
                 Get Started
               </Button>
@@ -118,7 +128,17 @@ export function ChatbotSection({ setActiveSection }: ChatbotSectionProps) {
               </ul>
               <Button 
                 className="w-full"
-                onClick={() => setActiveSection("contact")}
+                onClick={() => {
+                  const planData = {
+                    planName: "ChatHub Pro",
+                    price: "$149/month",
+                    description: "Best for growing businesses",
+                    features: ["Up to 10 chatbots", "10,000 conversations/month", "Advanced analytics", "Priority support", "Custom branding", "API access", "Team collaboration", "Multi-language support"],
+                    icon: "Bot"
+                  }
+                  sessionStorage.setItem('chathubSelection', JSON.stringify(planData))
+                  window.location.href = '/web-building/chathub-form'
+                }}
               >
                 Get Started
               </Button>
@@ -171,7 +191,17 @@ export function ChatbotSection({ setActiveSection }: ChatbotSectionProps) {
               </ul>
               <Button 
                 className="w-full"
-                onClick={() => setActiveSection("contact")}
+                onClick={() => {
+                  const planData = {
+                    planName: "ChatHub Enterprise",
+                    price: "$399/month",
+                    description: "For large organizations",
+                    features: ["Unlimited chatbots", "Unlimited conversations", "White-label solution", "Dedicated support", "Custom integrations", "SLA guarantee", "Advanced security", "On-premise deployment"],
+                    icon: "Bot"
+                  }
+                  sessionStorage.setItem('chathubSelection', JSON.stringify(planData))
+                  window.location.href = '/web-building/chathub-form'
+                }}
               >
                 Contact Sales
               </Button>
@@ -215,7 +245,17 @@ export function ChatbotSection({ setActiveSection }: ChatbotSectionProps) {
               </ul>
               <Button 
                 className="w-full"
-                onClick={() => setActiveSection("contact")}
+                onClick={() => {
+                  const serviceData = {
+                    serviceName: "Website Integration",
+                    price: "$799",
+                    description: "Integrate ChatHub into your existing website",
+                    features: ["Custom styling & branding", "Performance optimization", "Mobile responsive design", "Testing & quality assurance", "Documentation & training"],
+                    icon: "Zap"
+                  }
+                  sessionStorage.setItem('chathubSelection', JSON.stringify(serviceData))
+                  window.location.href = '/web-building/chathub-form'
+                }}
               >
                 Get Quote
               </Button>
@@ -256,7 +296,17 @@ export function ChatbotSection({ setActiveSection }: ChatbotSectionProps) {
               </ul>
               <Button 
                 className="w-full"
-                onClick={() => setActiveSection("contact")}
+                onClick={() => {
+                  const serviceData = {
+                    serviceName: "Custom AI Training",
+                    price: "$299",
+                    description: "Train AI on your business knowledge",
+                    features: ["Custom knowledge base setup", "Industry-specific training", "Response optimization", "Multi-language support", "Ongoing training updates"],
+                    icon: "Shield"
+                  }
+                  sessionStorage.setItem('chathubSelection', JSON.stringify(serviceData))
+                  window.location.href = '/web-building/chathub-form'
+                }}
               >
                 Get Quote
               </Button>
@@ -356,19 +406,37 @@ export function ChatbotSection({ setActiveSection }: ChatbotSectionProps) {
             <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Transform Your Customer Support?</h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
               Join thousands of businesses using ChatHub to provide 24/7 AI-powered customer support. 
-              Start your free trial today and see the difference AI can make for your business.
+              Get started today and see the difference AI can make for your business.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-                  <Globe className="w-5 h-5 mr-2" />
-                  Start Free Trial
-                </Button>
-              </Link>
+              <Button 
+                size="lg" 
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => {
+                  const generalData = {
+                    serviceName: "ChatHub AI Chatbot Integration",
+                    description: "Transform your customer support with AI-powered chatbots",
+                    icon: "Bot"
+                  }
+                  sessionStorage.setItem('chathubSelection', JSON.stringify(generalData))
+                  window.location.href = '/web-building/chathub-form'
+                }}
+              >
+                <Globe className="w-5 h-5 mr-2" />
+                Get Started
+              </Button>
               <Button 
                 variant="outline" 
                 size="lg"
-                onClick={() => setActiveSection("contact")}
+                onClick={() => {
+                  const demoData = {
+                    serviceName: "ChatHub Demo",
+                    description: "Schedule a personalized ChatHub demo",
+                    icon: "Bot"
+                  }
+                  sessionStorage.setItem('consultationSelection', JSON.stringify(demoData))
+                  window.location.href = '/web-building/consultation'
+                }}
               >
                 <MessageCircle className="w-5 h-5 mr-2" />
                 Schedule Demo

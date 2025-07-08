@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -24,69 +25,18 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { EnhancedBackButton } from "@/components/ui/enhanced-back-button"
+import { chathubIntegrationPlans } from "@/lib/pricing-config"
 
 export default function ChatHubIntegrationPage() {
   const router = useRouter()
 
-  const integrationPlans = [
-    {
-      name: "Basic Integration",
-      price: "$200/month",
-      description: "Perfect for small businesses",
-      features: [
-        "AI-powered chatbot setup",
-        "Basic training on your business",
-        "Website integration",
-        "Email support",
-        "Basic analytics",
-        "Up to 1,000 conversations/month",
-        "Standard response templates",
-        "Business hours support",
-        "Monthly reports",
-        "Basic customization"
-      ],
-      popular: false,
-      icon: Bot
-    },
-    {
-      name: "Professional Integration",
-      price: "$500/month",
-      description: "Ideal for growing businesses",
-      features: [
-        "Everything in Basic, plus:",
-        "Advanced AI training",
-        "Multi-platform integration",
-        "Custom chatbot personality",
-        "Advanced analytics dashboard",
-        "Up to 10,000 conversations/month",
-        "Priority support",
-        "Custom integrations",
-        "Performance optimization",
-        "Quarterly strategy sessions"
-      ],
-      popular: true,
-      icon: Star
-    },
-    {
-      name: "Enterprise Integration",
-      price: "$1,000/month",
-      description: "For large organizations",
-      features: [
-        "Everything in Professional, plus:",
-        "Custom AI model training",
-        "Unlimited conversations",
-        "Advanced security features",
-        "Dedicated support team",
-        "Custom development hours",
-        "API access",
-        "White-label solutions",
-        "Strategic consulting",
-        "24/7 support"
-      ],
-      popular: false,
-      icon: TrendingUp
-    }
-  ]
+  const [selectedIntegrationPlan, setSelectedIntegrationPlan] = useState<any>(null)
+
+  const integrationPlans = chathubIntegrationPlans.map(plan => ({
+    ...plan,
+    icon: plan.name.includes("Basic") ? Bot :
+          plan.name.includes("Professional") ? Star : TrendingUp
+  }))
 
   const platforms = [
     {
@@ -159,6 +109,16 @@ export default function ChatHubIntegrationPage() {
       description: "Maintain your brand voice and personality across all interactions."
     }
   ]
+
+  const handleGetStarted = (plan: any) => {
+    setSelectedIntegrationPlan(plan)
+    const formData = {
+      selectedPlan: plan,
+      serviceType: 'chathub_integration_selection'
+    }
+    sessionStorage.setItem('chathubSelection', JSON.stringify(formData))
+    router.push('/web-building/chathub-form')
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-orange-50/5 to-purange-100/10 dark:from-background dark:via-orange-900/20 dark:to-orange-800/10">
@@ -245,7 +205,10 @@ export default function ChatHubIntegrationPage() {
                       ))}
                     </div>
                     
-                    <Button className="w-full bg-gradient-to-r from-orange-600 to-blue-600 hover:from-orange-700 hover:to-blue-700">
+                    <Button 
+                      className="w-full bg-gradient-to-r from-orange-600 to-blue-600 hover:from-orange-700 hover:to-blue-700"
+                      onClick={() => handleGetStarted(plan)}
+                    >
                       Get Started
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
@@ -380,7 +343,7 @@ export default function ChatHubIntegrationPage() {
                     <Link href="/web-building/quote">Get Free Quote</Link>
                   </Button>
                   <Button variant="outline" asChild>
-                    <Link href="/contact">Contact Us</Link>
+                    <Link href="/web-building/home?section=contact">Contact Us</Link>
                   </Button>
                 </div>
               </CardContent>

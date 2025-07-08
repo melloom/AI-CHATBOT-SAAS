@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { getUserNotifications, createNotification, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification, clearAllNotifications } from "@/lib/firebase"
 import { notificationService } from "@/lib/notifications"
-import { onSnapshot, query, collection, where, orderBy, limit } from "firebase/firestore"
+import { onSnapshot, query, collection, where, orderBy, limit, or, getDocs } from "firebase/firestore"
 import { db, auth } from "@/lib/firebase"
 import { registerBackgroundRefresh, unregisterBackgroundRefresh } from "@/lib/background-refresh"
 
@@ -19,34 +19,63 @@ export function useNotifications() {
       return
     }
 
-    // Set up real-time listener for notifications
-    const notificationsQuery = query(
-      collection(db, "notifications"),
-      where("userId", "==", user.uid),
-      orderBy("createdAt", "desc"),
-      limit(20)
-    )
+    // Helper to check if user is admin
+    const checkAdminAndListen = async () => {
+      let isAdmin = false
+      try {
+        const userDoc = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)))
+        if (!userDoc.empty) {
+          isAdmin = userDoc.docs[0].data().isAdmin === true
+        }
+      } catch (e) {
+        // fallback: not admin
+      }
 
-    const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
-      const userNotifications = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }))
-      setNotifications(userNotifications)
-      updateUnreadCount(userNotifications)
-      setLoading(false)
-    }, (error) => {
-      console.error("Error listening to notifications:", error)
-      setLoading(false)
-    })
+      let notificationsQuery
+      if (isAdmin) {
+        // Admin: fetch own notifications and those with target: 'admin' or type: 'system'
+        notificationsQuery = query(
+          collection(db, "notifications"),
+          or(
+            where("userId", "==", user.uid),
+            where("target", "==", "admin"),
+            where("type", "==", "system")
+          ),
+          orderBy("createdAt", "desc"),
+          limit(30)
+        )
+      } else {
+        notificationsQuery = query(
+          collection(db, "notifications"),
+          where("userId", "==", user.uid),
+          orderBy("createdAt", "desc"),
+          limit(20)
+        )
+      }
 
-    // Set up background refresh every 30 seconds
-    registerBackgroundRefresh('notifications', refreshNotifications, 30000)
+      const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
+        const userNotifications = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        setNotifications(userNotifications)
+        updateUnreadCount(userNotifications)
+        setLoading(false)
+      }, (error) => {
+        console.error("Error listening to notifications:", error)
+        setLoading(false)
+      })
 
-    return () => {
-      unsubscribe()
-      unregisterBackgroundRefresh('notifications')
+      // Set up background refresh every 30 seconds
+      registerBackgroundRefresh('notifications', refreshNotifications, 30000)
+
+      return () => {
+        unsubscribe()
+        unregisterBackgroundRefresh('notifications')
+      }
     }
+
+    checkAdminAndListen()
   }, [])
 
   const updateUnreadCount = (notifications: any[]) => {

@@ -6,10 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Bot, MessageSquare, CreditCard, Plus, Users, TrendingUp, Clock, Zap, Target } from "lucide-react"
+import { Bot, MessageSquare, CreditCard, Plus, Users, TrendingUp, Clock, Zap, Target, Settings, Brain, Globe, BarChart3 } from "lucide-react"
 import Link from "next/link"
 import { useChatbots } from "@/hooks/use-chatbots"
 import { useSubscription } from "@/hooks/use-subscription"
+import { useDashboardAnalytics } from "@/hooks/use-analytics"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Building2, Crown } from "lucide-react"
 import { useImpersonation } from "@/components/providers/impersonation-provider"
@@ -21,6 +22,7 @@ export default function DashboardPage() {
   const { user, profile } = useAuth()
   const { chatbots } = useChatbots()
   const { subscription } = useSubscription()
+  const { getTodayConversations, getConversationGrowth, getSuccessRate } = useDashboardAnalytics()
   const { 
     impersonatedCompany, 
     setImpersonatedCompany, 
@@ -73,7 +75,74 @@ export default function DashboardPage() {
     }
   }
 
-  const quickActions = [
+  const isWebVaultOnly = profile?.platforms && Object.keys(profile.platforms).length === 1 && profile.platforms.webvault?.access;
+  const quickActions = profile?.accountType === 'personal' ? [
+    {
+      title: "Create AI Assistant",
+      description: "Build your personal AI assistant in minutes",
+      icon: Plus,
+      href: "/dashboard/personal-ai/create",
+      gradient: "gradient-bg-1",
+      badge: "Popular",
+    },
+    {
+      title: "Browse Templates",
+      description: "Ready-made AI assistant templates",
+      icon: Bot,
+      href: "/dashboard/personal-ai/templates",
+      gradient: "gradient-bg-2",
+      badge: "New",
+    },
+    {
+      title: "Upgrade Plan",
+      description: "Unlock advanced AI features and higher limits",
+      icon: CreditCard,
+      href: "/dashboard/billing",
+      gradient: "gradient-bg-3",
+      badge: "Recommended",
+    },
+    {
+      title: "AI Settings",
+      description: "Customize your AI preferences and behavior",
+      icon: Settings,
+      href: "/dashboard/personal-ai/settings",
+      gradient: "gradient-bg-4",
+      badge: null,
+    },
+  ] : isWebVaultOnly ? [
+    {
+      title: "Request New Web App",
+      description: "Submit a request for a new website or web application",
+      icon: Plus,
+      href: "/dashboard/web-building/quote",
+      gradient: "gradient-bg-1",
+      badge: "Popular",
+    },
+    {
+      title: "Manage Websites",
+      description: "View and manage your existing websites",
+      icon: Globe,
+      href: "/dashboard/web-building",
+      gradient: "gradient-bg-2",
+      badge: "Manage",
+    },
+    {
+      title: "Website Analytics",
+      description: "Track your website performance and analytics",
+      icon: BarChart3,
+      href: "/dashboard/web-building/analytics",
+      gradient: "gradient-bg-3",
+      badge: "New",
+    },
+    {
+      title: "WebVault Settings",
+      description: "Configure your WebVault account and preferences",
+      icon: Settings,
+      href: "/dashboard/web-building/settings",
+      gradient: "gradient-bg-4",
+      badge: null,
+    },
+  ] : [
     {
       title: "Create Your First Bot",
       description: "Launch an AI assistant in under 5 minutes",
@@ -108,39 +177,33 @@ export default function DashboardPage() {
     },
   ]
 
-  const recentActivities = [
+  const recentActivities = profile?.accountType === 'personal' ? [
     {
       icon: MessageSquare,
-      title: "Support Bot handled 47 conversations",
-      description: "Customer satisfaction: 96%",
-      time: "2 hours ago",
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-    },
+      title: "No recent activity",
+      description: "Your AI assistants are ready to help",
+      time: "Just now",
+      color: "text-gray-600",
+      bgColor: "bg-gray-100",
+    }
+  ] : isWebVaultOnly ? [
     {
-      icon: Users,
-      title: "New team member Sarah joined",
-      description: "Role: Customer Support Specialist",
-      time: "4 hours ago",
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
-    },
+      icon: Globe,
+      title: "No recent activity",
+      description: "Your WebVault dashboard is ready",
+      time: "Just now",
+      color: "text-gray-600",
+      bgColor: "bg-gray-100",
+    }
+  ] : [
     {
-      icon: Bot,
-      title: "Sales Bot updated with Q4 pricing",
-      description: "Now includes holiday promotions",
-      time: "6 hours ago",
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
-    },
-    {
-      icon: TrendingUp,
-      title: "Monthly usage report generated",
-      description: "85% efficiency improvement this month",
-      time: "1 day ago",
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
-    },
+      icon: MessageSquare,
+      title: "No recent activity",
+      description: "Your ChatHub dashboard is ready",
+      time: "Just now",
+      color: "text-gray-600",
+      bgColor: "bg-gray-100",
+    }
   ]
 
   // Render custom admin dashboard if admin and not impersonating
@@ -341,7 +404,12 @@ export default function DashboardPage() {
             <div>
               <div className="flex items-center space-x-3 mb-2">
                 <h1 className="text-3xl md:text-4xl font-bold">
-                  Welcome back to ChatHub, {impersonatedCompany?.companyName || profile?.companyName || "there"}! 👋
+                  {profile?.accountType === 'personal'
+                    ? `Welcome back to Personal AI, ${profile?.firstName || profile?.lastName || "there"}! 👋`
+                    : (profile?.platforms && Object.keys(profile.platforms).length === 1 && profile.platforms.webvault?.access)
+                      ? `Welcome back to WebVault, ${profile?.companyName || "there"}! 👋`
+                      : `Welcome back to ChatHub, ${impersonatedCompany?.companyName || profile?.companyName || "there"}! 👋`
+                  }
                 </h1>
                 {profile?.isAdmin && (
                   <div className="flex items-center space-x-2 bg-yellow-500/20 px-3 py-1 rounded-full">
@@ -351,7 +419,12 @@ export default function DashboardPage() {
                 )}
               </div>
               <p className="text-lg text-white/90 mb-4">
-                Your AI chatbots are working hard. Here's what's happening today.
+                {profile?.accountType === 'personal'
+                  ? "Your personal AI assistants are working hard. Here's what's happening today."
+                  : (profile?.platforms && Object.keys(profile.platforms).length === 1 && profile.platforms.webvault?.access)
+                    ? "Manage your websites and web apps with WebVault. Here's what's happening today."
+                    : "Your AI chatbots are working hard. Here's what's happening today."
+                }
               </p>
               
 
@@ -381,18 +454,23 @@ export default function DashboardPage() {
         <Card className="relative overflow-hidden border-0 shadow-lg">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100"></div>
           <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-800">Active Chatbots</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-800">
+              {profile?.accountType === 'personal' ? 'Active AI Assistants' : 'Active Chatbots'}
+            </CardTitle>
             <div className="p-2 bg-blue-500 rounded-lg">
               <Bot className="h-4 w-4 text-white" />
             </div>
           </CardHeader>
           <CardContent className="relative">
             <div className="text-3xl font-bold text-blue-900">
-              {profile?.isAdmin && impersonatedCompany ? impersonatedCompany.chatbots : chatbots.length}
+              {profile?.accountType === 'personal' ? '2' : (profile?.isAdmin && impersonatedCompany ? impersonatedCompany.chatbots : chatbots.length)}
             </div>
             <p className="text-xs text-blue-600 flex items-center mt-1">
               <TrendingUp className="w-3 h-3 mr-1" />
-              {profile?.isAdmin && impersonatedCompany ? `${impersonatedCompany.chatbots} total` : `${chatbots.filter((bot) => bot.active).length} currently active`}
+              {profile?.accountType === 'personal' 
+                ? '2 currently active' 
+                : (profile?.isAdmin && impersonatedCompany ? `${impersonatedCompany.chatbots} total` : `${chatbots.filter((bot) => bot.active).length} currently active`)
+              }
             </p>
           </CardContent>
         </Card>
@@ -400,18 +478,23 @@ export default function DashboardPage() {
         <Card className="relative overflow-hidden border-0 shadow-lg">
           <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-green-100"></div>
           <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-800">Conversations Today</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-800">
+              {profile?.accountType === 'personal' ? 'AI Interactions Today' : 'Conversations Today'}
+            </CardTitle>
             <div className="p-2 bg-green-500 rounded-lg">
               <MessageSquare className="h-4 w-4 text-white" />
             </div>
           </CardHeader>
           <CardContent className="relative">
             <div className="text-3xl font-bold text-green-900">
-              {profile?.isAdmin && impersonatedCompany ? impersonatedCompany.conversations : "1,247"}
+              {profile?.accountType === 'personal' ? '68' : (profile?.isAdmin && impersonatedCompany ? impersonatedCompany.conversations : getTodayConversations().length)}
             </div>
             <p className="text-xs text-green-600 flex items-center mt-1">
               <TrendingUp className="w-3 h-3 mr-1" />
-              {profile?.isAdmin && impersonatedCompany ? "Total conversations" : "+23% from yesterday"}
+              {profile?.accountType === 'personal' 
+                ? '+12% from yesterday' 
+                : (profile?.isAdmin && impersonatedCompany ? "Total conversations" : getTodayConversations().length > 0 ? `+${getConversationGrowth()}% from yesterday` : "No conversations yet")
+              }
             </p>
           </CardContent>
         </Card>
@@ -427,11 +510,11 @@ export default function DashboardPage() {
           <CardContent className="relative">
             <div className="text-2xl font-bold text-purple-900">
               <Badge variant="default" className="bg-purple-600 hover:bg-purple-700">
-                {profile?.isAdmin && impersonatedCompany ? impersonatedCompany.subscription : (subscription?.plan || "Pro Plan")}
+                {profile?.isAdmin && impersonatedCompany ? impersonatedCompany.subscription : (subscription?.plan || "Free Plan")}
               </Badge>
             </div>
             <p className="text-xs text-purple-600 mt-1">
-              {profile?.isAdmin && impersonatedCompany ? "Selected company plan" : (subscription?.daysLeft ? `${subscription.daysLeft} days left` : "Renews Jan 15")}
+              {profile?.isAdmin && impersonatedCompany ? "Selected company plan" : (subscription?.daysLeft ? `${subscription.daysLeft} days left` : "No active subscription")}
             </p>
           </CardContent>
         </Card>
@@ -445,10 +528,12 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="relative">
-            <div className="text-3xl font-bold text-orange-900">98.5%</div>
+            <div className="text-3xl font-bold text-orange-900">
+              {profile?.accountType === 'personal' ? '95.2%' : `${getSuccessRate()}%`}
+            </div>
             <p className="text-xs text-orange-600 flex items-center mt-1">
               <Zap className="w-3 h-3 mr-1" />
-              Resolution accuracy
+              {profile?.accountType === 'personal' ? 'Resolution accuracy' : getSuccessRate() > 0 ? 'Resolution accuracy' : 'No data available'}
             </p>
           </CardContent>
         </Card>
@@ -490,8 +575,15 @@ export default function DashboardPage() {
         <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-xl text-gray-900 dark:text-white">Recent Activity</CardTitle>
-              <CardDescription className="dark:text-gray-200">Latest updates from your AI assistants</CardDescription>
+              <CardTitle className="text-xl text-gray-900 dark:text-white">
+                {profile?.accountType === 'personal' ? 'Recent AI Activity' : 'Recent Activity'}
+              </CardTitle>
+              <CardDescription className="dark:text-gray-200">
+                {profile?.accountType === 'personal' 
+                  ? 'Latest updates from your personal AI assistants' 
+                  : 'Latest updates from your AI assistants'
+                }
+              </CardDescription>
             </div>
             <Button variant="outline" size="sm" className="bg-white dark:bg-gray-900 dark:text-white border-gray-300 dark:border-gray-700">
               View All

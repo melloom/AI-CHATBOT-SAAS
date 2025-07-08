@@ -91,7 +91,7 @@ export default function FAQPage() {
       questions: [
         {
           question: "What pricing plans are available?",
-          answer: "We offer Starter ($29/month), Professional ($99/month), Business ($299/month), and Enterprise (custom pricing) plans. Each plan includes different features, conversation limits, and support levels."
+          answer: "We offer Starter ($29/month), Professional ($79/month), and Enterprise ($199/month) plans. Each plan includes different features, conversation limits, and support levels."
         },
         {
           question: "Are there any hidden fees?",

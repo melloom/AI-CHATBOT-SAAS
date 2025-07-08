@@ -26,7 +26,9 @@ import {
   Briefcase,
   Palette,
   Info,
-  Clock
+  Clock,
+  Building2,
+  Smartphone
 } from "lucide-react"
 import { useState } from "react"
 import { QuoteWidget } from "./quote-widget"
@@ -76,6 +78,21 @@ export function WebVaultFooter() {
       ],
       pricing: "Starting from $2,500",
       timeline: "4-8 weeks depending on complexity"
+    },
+    'business-services': {
+      title: "Business & Legal Services",
+      icon: Building2,
+      description: "Complete business and legal services for company formation and compliance",
+      features: [
+        "Company formation and legal setup",
+        "Business plan development",
+        "Legal document templates",
+        "Compliance and regulatory services",
+        "Intellectual property protection",
+        "Industry-specific legal services"
+      ],
+      pricing: "Starting from $300",
+      timeline: "1-4 weeks depending on service"
     },
     'pricing-plans': {
       title: "Pricing Plans",
@@ -145,12 +162,16 @@ export function WebVaultFooter() {
       icon: Users,
       description: "Professional web development services focused on creating exceptional digital experiences",
       features: [
-        "Founded by experienced developers",
-        "Specialized in modern web technologies",
-        "Client-focused approach",
-        "Quality-driven development process",
-        "Ongoing support and maintenance",
-        "Transparent communication"
+        "Founded by experienced developers with 10+ years in web development",
+        "Specialized in modern web technologies (React, Next.js, Node.js)",
+        "Client-focused approach with personalized solutions",
+        "Quality-driven development process with rigorous testing",
+        "Ongoing support and maintenance for all projects",
+        "Transparent communication throughout the entire process",
+        "Mobile-first responsive design approach",
+        "SEO-optimized websites for better visibility",
+        "E-commerce and business solutions expertise",
+        "24/7 technical support and monitoring"
       ],
       pricing: "N/A",
       timeline: "Established 2024"
@@ -191,10 +212,10 @@ export function WebVaultFooter() {
     <footer className="bg-slate-900 text-white">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           
           {/* Company Info */}
-          <div className="space-y-4">
+          <div className="space-y-4 lg:col-span-2">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
                 <Globe className="w-6 h-6 text-white" />
@@ -204,9 +225,19 @@ export function WebVaultFooter() {
                 <p className="text-sm text-gray-400">Professional Web Solutions</p>
               </div>
             </div>
-            <p className="text-gray-300 text-sm">
-              Build, launch, and manage your website with ease. WebVault empowers you to create a professional online presence.
+            <p className="text-gray-300 text-sm leading-relaxed">
+              WebVault is a leading web development company specializing in creating exceptional digital experiences. We combine cutting-edge technology with innovative design to deliver websites that drive business growth and enhance user engagement.
             </p>
+            <div className="flex items-center space-x-4 text-xs text-gray-400">
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>10+ Years Experience</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>100+ Projects</span>
+              </div>
+            </div>
           </div>
 
           {/* Services */}
@@ -231,6 +262,11 @@ export function WebVaultFooter() {
               <li>
                 <Link href="/web-building/chathub-integration" className="hover:text-white transition-colors">
                   ChatHub Integration
+                </Link>
+              </li>
+              <li>
+                <Link href="/web-building/business-services" className="hover:text-white transition-colors">
+                  Business Services
                 </Link>
               </li>
               <li>
@@ -318,6 +354,62 @@ export function WebVaultFooter() {
               </div>
             </div>
           </div>
+
+          {/* Expertise */}
+          <div className="space-y-4">
+            <h4 className="text-lg font-semibold">Expertise</h4>
+            <div className="space-y-3 text-sm text-gray-300">
+              <div className="flex items-center space-x-2">
+                <Code className="w-4 h-4 text-blue-400" />
+                <span>React & Next.js</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Palette className="w-4 h-4 text-purple-400" />
+                <span>UI/UX Design</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Server className="w-4 h-4 text-green-400" />
+                <span>Backend Development</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Bot className="w-4 h-4 text-pink-400" />
+                <span>AI Integration</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Smartphone className="w-4 h-4 text-orange-400" />
+                <span>Mobile-First Design</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Shield className="w-4 h-4 text-red-400" />
+                <span>Security & SEO</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Call to Action */}
+        <div className="border-t border-slate-800 mt-8 pt-8">
+          <div className="text-center space-y-4">
+            <h3 className="text-2xl font-bold text-white">Ready to Start Your Project?</h3>
+            <p className="text-gray-300 max-w-2xl mx-auto">
+              Let's discuss your vision and create something amazing together. Get a free consultation and quote today.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                onClick={() => setIsQuoteWidgetOpen(true)}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3"
+              >
+                Get Free Quote
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => openDialog('about-us')}
+                className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-8 py-3"
+              >
+                Learn More About Us
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Back to Top */}
@@ -346,6 +438,8 @@ export function WebVaultFooter() {
               <span>Made with</span>
               <Heart className="w-4 h-4 text-red-500" />
               <span>by Melvin Cruz</span>
+              <span>•</span>
+              <span>Maryland, USA</span>
             </div>
             
             <div className="flex items-center space-x-6 text-sm">
@@ -455,10 +549,32 @@ export function WebVaultFooter() {
               
               {/* Content */}
               <div className="p-6 space-y-6">
+                {/* Mission & Vision */}
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-6 rounded-lg">
+                  <h3 className="font-bold text-xl mb-4 text-gray-900 dark:text-white flex items-center">
+                    <div className="w-1 h-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mr-3"></div>
+                    Our Mission
+                  </h3>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-4">
+                    To empower businesses with cutting-edge web solutions that drive growth, enhance user experience, and establish a strong digital presence in today's competitive market.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-white/50 dark:bg-slate-800/50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-2">🎯 Vision</h4>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">To be the leading web development partner for businesses seeking innovative digital solutions.</p>
+                    </div>
+                    <div className="bg-white/50 dark:bg-slate-800/50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-2">💡 Values</h4>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">Innovation, Quality, Transparency, Client Success, and Continuous Learning.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Core Strengths */}
                 <div>
                   <h3 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white flex items-center">
                     <div className="w-1 h-6 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mr-3"></div>
-                    Details
+                    Core Strengths
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {dialog.features.map((feature, index) => (
@@ -469,19 +585,89 @@ export function WebVaultFooter() {
                     ))}
                   </div>
                 </div>
+
+                {/* Services Overview */}
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 p-6 rounded-lg">
+                  <h3 className="font-bold text-xl mb-4 text-gray-900 dark:text-white flex items-center">
+                    <div className="w-1 h-6 bg-gradient-to-r from-green-600 to-blue-600 rounded-full mr-3"></div>
+                    What We Offer
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white/50 dark:bg-slate-800/50 p-4 rounded-lg text-center">
+                      <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Code className="w-6 h-6 text-white" />
+                      </div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Custom Development</h4>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">Tailored websites and web applications built to your specific requirements.</p>
+                    </div>
+                    <div className="bg-white/50 dark:bg-slate-800/50 p-4 rounded-lg text-center">
+                      <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Server className="w-6 h-6 text-white" />
+                      </div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Hosting & Maintenance</h4>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">Reliable hosting solutions with 24/7 monitoring and ongoing support.</p>
+                    </div>
+                    <div className="bg-white/50 dark:bg-slate-800/50 p-4 rounded-lg text-center">
+                      <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Bot className="w-6 h-6 text-white" />
+                      </div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-2">AI Integration</h4>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm">ChatHub AI chatbots and intelligent automation solutions.</p>
+                    </div>
+                  </div>
+                </div>
                 
+                {/* Development Process */}
+                <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 p-6 rounded-lg">
+                  <h3 className="font-bold text-xl mb-4 text-gray-900 dark:text-white flex items-center">
+                    <div className="w-1 h-6 bg-gradient-to-r from-orange-600 to-red-600 rounded-full mr-3"></div>
+                    Our Development Process
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-white/50 dark:bg-slate-800/50 p-4 rounded-lg text-center">
+                      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span className="text-white font-bold">1</span>
+                      </div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Discovery</h4>
+                      <p className="text-gray-600 dark:text-gray-300 text-xs">Understanding your needs and project requirements</p>
+                    </div>
+                    <div className="bg-white/50 dark:bg-slate-800/50 p-4 rounded-lg text-center">
+                      <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span className="text-white font-bold">2</span>
+                      </div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Planning</h4>
+                      <p className="text-gray-600 dark:text-gray-300 text-xs">Creating detailed project roadmap and architecture</p>
+                    </div>
+                    <div className="bg-white/50 dark:bg-slate-800/50 p-4 rounded-lg text-center">
+                      <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span className="text-white font-bold">3</span>
+                      </div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Development</h4>
+                      <p className="text-gray-600 dark:text-gray-300 text-xs">Building your solution with modern technologies</p>
+                    </div>
+                    <div className="bg-white/50 dark:bg-slate-800/50 p-4 rounded-lg text-center">
+                      <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <span className="text-white font-bold">4</span>
+                      </div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Launch</h4>
+                      <p className="text-gray-600 dark:text-gray-300 text-xs">Deployment and ongoing support & maintenance</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Company Info */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200 dark:border-slate-700">
                   <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-lg">
                     <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
                       <Info className="w-4 h-4 mr-2 text-purple-600" />
-                      Availability
+                      Company Status
                     </h4>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">{dialog.pricing}</p>
                   </div>
                   <div className="bg-gradient-to-r from-pink-50 to-purple-50 dark:from-pink-900/20 dark:to-purple-900/20 p-4 rounded-lg">
                     <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
                       <Clock className="w-4 h-4 mr-2 text-pink-600" />
-                      Timeline
+                      Established
                     </h4>
                     <p className="text-gray-600 dark:text-gray-300 text-sm">{dialog.timeline}</p>
                   </div>

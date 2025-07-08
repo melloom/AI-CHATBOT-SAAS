@@ -16,7 +16,7 @@ export default function ChatHubLandingPage() {
   const handleChangeService = () => {
     localStorage.removeItem('userServicePreference');
     localStorage.removeItem('hasVisitedSelection');
-    router.push('/selection');
+    router.push('/')
   }
 
   return (

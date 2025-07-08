@@ -1,8 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { 
   Code, 
   Globe, 
@@ -24,72 +26,32 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { EnhancedBackButton } from "@/components/ui/enhanced-back-button"
+import { customDevelopmentServices } from "@/lib/pricing-config"
+import { useToast } from "@/hooks/use-toast"
 
 export default function CustomDevelopmentPage() {
   const router = useRouter()
+  const { toast } = useToast()
+  const [selectedService, setSelectedService] = useState<any>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const services = [
-    {
-      icon: Globe,
-      title: "Custom Website Development",
-      description: "Tailored websites built specifically for your business needs",
-      features: [
-        "Responsive design for all devices",
-        "SEO optimization",
-        "Fast loading times",
-        "Custom functionality",
-        "Content management system",
-        "Analytics integration"
-      ],
-      price: "Starting from $2,500",
-      timeline: "4-8 weeks"
-    },
-    {
-      icon: Smartphone,
-      title: "Mobile App Development",
-      description: "Native and cross-platform mobile applications",
-      features: [
-        "iOS and Android development",
-        "Cross-platform solutions",
-        "App store optimization",
-        "Push notifications",
-        "Offline functionality",
-        "User authentication"
-      ],
-      price: "Starting from $8,000",
-      timeline: "8-16 weeks"
-    },
-    {
-      icon: Database,
-      title: "Web Application Development",
-      description: "Complex web applications and SaaS platforms",
-      features: [
-        "User management systems",
-        "Payment processing",
-        "Real-time features",
-        "API development",
-        "Database design",
-        "Security implementation"
-      ],
-      price: "Starting from $15,000",
-      timeline: "12-24 weeks"
-    },
-    {
-      icon: Palette,
-      title: "E-commerce Solutions",
-      description: "Complete online store development",
-      features: [
-        "Product catalog management",
-        "Shopping cart functionality",
-        "Payment gateway integration",
-        "Inventory management",
-        "Order processing",
-        "Customer accounts"
-      ],
-      price: "Starting from $5,000",
-      timeline: "6-12 weeks"
-    }
-  ]
+  const services = customDevelopmentServices.map(service => ({
+    icon: service.name.includes("Website") ? Globe :
+          service.name.includes("Mobile") ? Smartphone :
+          service.name.includes("Application") ? Database : Palette,
+    title: service.name,
+    description: service.description,
+    features: [
+      "Responsive design for all devices",
+      "SEO optimization",
+      "Fast loading times",
+      "Custom functionality",
+      "Content management system",
+      "Analytics integration"
+    ],
+    price: service.price,
+    timeline: "4-8 weeks"
+  }))
 
   const technologies = [
     { name: "React & Next.js", icon: "⚛️", description: "Modern, fast web applications" },
@@ -97,8 +59,147 @@ export default function CustomDevelopmentPage() {
     { name: "Python & Django", icon: "🐍", description: "Robust web frameworks" },
     { name: "PHP & Laravel", icon: "🐘", description: "Enterprise-grade applications" },
     { name: "WordPress", icon: "📝", description: "Content management systems" },
-    { name: "Shopify", icon: "🛒", description: "E-commerce platforms" }
+    { name: "Shopify", icon: "🛒", description: "E-commerce platforms" },
+    { name: "Vue.js & Nuxt", icon: "💚", description: "Progressive JavaScript framework" },
+    { name: "TypeScript", icon: "🔷", description: "Type-safe JavaScript development" },
+    { name: "Tailwind CSS", icon: "🎨", description: "Utility-first CSS framework" },
+    { name: "PostgreSQL", icon: "🐘", description: "Advanced open-source database" },
+    { name: "MongoDB", icon: "🍃", description: "NoSQL document database" },
+    { name: "Firebase", icon: "🔥", description: "Google's app development platform" },
+    { name: "Docker", icon: "🐳", description: "Containerized deployment" },
+    { name: "AWS & Cloud", icon: "☁️", description: "Scalable cloud infrastructure" },
+    { name: "GraphQL", icon: "🔷", description: "Modern API query language" },
+    { name: "REST APIs", icon: "🔗", description: "Custom API development" },
+    { name: "WebSockets", icon: "⚡", description: "Real-time communication" },
+    { name: "PWA Development", icon: "📱", description: "Progressive web apps" },
+    { name: "JAMstack", icon: "🍓", description: "Modern web architecture" },
+    { name: "Headless CMS", icon: "📄", description: "Content-first approach" },
+    { name: "Microservices", icon: "🔧", description: "Scalable service architecture" }
   ]
+
+  // Detailed service information for popups
+  const serviceDetails = {
+    "Custom Website Development": {
+      title: "Custom Website Development",
+      description: "Tailored website solutions built specifically for your business needs",
+      price: "Starting from $2,500",
+      duration: "4-8 weeks",
+      includes: [
+        "Custom website design and development",
+        "Responsive design for all devices",
+        "Content management system",
+        "SEO optimization",
+        "Performance optimization",
+        "Security implementation",
+        "Testing and quality assurance",
+        "Deployment and launch support"
+      ],
+      process: [
+        "Requirements gathering and planning",
+        "Design and wireframing",
+        "Development and coding",
+        "Testing and quality assurance",
+        "Deployment and launch"
+      ],
+      whyThisPrice: "Custom website development typically costs $5,000-15,000. Our streamlined process and modern tools allow us to deliver quality websites starting at $2,500."
+    },
+    "E-commerce Development": {
+      title: "E-commerce Development",
+      description: "Complete online store solutions with payment processing",
+      price: "Starting from $8,000",
+      duration: "6-12 weeks",
+      includes: [
+        "Custom e-commerce platform development",
+        "Payment gateway integration",
+        "Product catalog management",
+        "Shopping cart functionality",
+        "Order processing system",
+        "Inventory management",
+        "Customer accounts and profiles",
+        "Security and PCI compliance"
+      ],
+      process: [
+        "E-commerce requirements analysis",
+        "Platform architecture design",
+        "Payment system integration",
+        "Development and testing",
+        "Launch and training"
+      ],
+      whyThisPrice: "E-commerce development typically costs $15,000-50,000. Our efficient development process delivers quality solutions starting at $8,000."
+    },
+    "Web Application Development": {
+      title: "Web Application Development",
+      description: "Custom web applications and business software",
+      price: "Starting from $15,000",
+      duration: "8-16 weeks",
+      includes: [
+        "Custom web application development",
+        "Database design and implementation",
+        "User authentication and authorization",
+        "API development and integration",
+        "Real-time features and updates",
+        "Advanced security features",
+        "Performance optimization",
+        "Scalability planning"
+      ],
+      process: [
+        "Application architecture planning",
+        "Database and API design",
+        "Core functionality development",
+        "Advanced features implementation",
+        "Testing and deployment"
+      ],
+      whyThisPrice: "Custom web applications typically cost $25,000-100,000. Our efficient development methodology delivers quality applications starting at $15,000."
+    },
+    "API Development": {
+      title: "API Development",
+      description: "Custom API development and third-party integrations",
+      price: "Starting from $5,000",
+      duration: "3-6 weeks",
+      includes: [
+        "Custom API design and development",
+        "Third-party service integration",
+        "Authentication and security",
+        "Documentation and testing",
+        "Performance optimization",
+        "Rate limiting and monitoring",
+        "Error handling and logging",
+        "API versioning and maintenance"
+      ],
+      process: [
+        "API requirements analysis",
+        "Architecture and design",
+        "Development and testing",
+        "Documentation and deployment"
+      ],
+      whyThisPrice: "API development typically costs $8,000-25,000. Our streamlined approach delivers quality APIs starting at $5,000."
+    }
+  }
+
+  const handleGetQuote = (service: any) => {
+    setSelectedService(service)
+    setIsDialogOpen(true)
+  }
+
+  const handleContactService = () => {
+    // Close the dialog
+    setIsDialogOpen(false)
+    // Navigate to contact page with service pre-filled
+    const serviceName = selectedService?.title || 'Custom Development Service'
+    const servicePrice = selectedService?.price || ''
+    const queryParams = new URLSearchParams({
+      service: serviceName,
+      price: servicePrice,
+      source: 'custom-development'
+    })
+    
+    toast({
+      title: "Redirecting to contact form",
+      description: `We're taking you to the contact form to discuss ${serviceName}.`,
+    })
+    
+    router.push(`/contact?${queryParams.toString()}`)
+  }
 
   const process = [
     {
@@ -211,7 +312,10 @@ export default function CustomDevelopmentPage() {
                     </div>
                   </div>
                   
-                  <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    onClick={() => handleGetQuote(service)}
+                  >
                     Get Quote
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -229,13 +333,13 @@ export default function CustomDevelopmentPage() {
               </p>
             </div>
             
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {technologies.map((tech, index) => (
                 <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                  <CardContent className="pt-6">
-                    <div className="text-4xl mb-4">{tech.icon}</div>
-                    <h3 className="font-semibold text-foreground mb-2">{tech.name}</h3>
-                    <p className="text-sm text-muted-foreground">{tech.description}</p>
+                  <CardContent className="pt-4">
+                    <div className="text-3xl mb-3">{tech.icon}</div>
+                    <h3 className="font-semibold text-foreground mb-2 text-sm">{tech.name}</h3>
+                    <p className="text-xs text-muted-foreground">{tech.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -295,6 +399,132 @@ export default function CustomDevelopmentPage() {
           </div>
         </div>
       </div>
+
+      {/* Service Details Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              {selectedService && serviceDetails[selectedService.title as keyof typeof serviceDetails] 
+                ? serviceDetails[selectedService.title as keyof typeof serviceDetails].title 
+                : "Service Details"}
+            </DialogTitle>
+            {selectedService && serviceDetails[selectedService.title as keyof typeof serviceDetails] && (
+              <div className="flex items-center space-x-4 mt-4">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                  <selectedService.icon className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-muted-foreground">
+                    {serviceDetails[selectedService.title as keyof typeof serviceDetails].description}
+                  </p>
+                </div>
+              </div>
+            )}
+          </DialogHeader>
+          
+          {selectedService && serviceDetails[selectedService.title as keyof typeof serviceDetails] && (
+            <div className="space-y-6">
+              {/* Pricing Information */}
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Code className="w-5 h-5 text-blue-600" />
+                    <span className="font-semibold">Price</span>
+                  </div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {serviceDetails[selectedService.title as keyof typeof serviceDetails].price}
+                  </div>
+                </div>
+                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Clock className="w-5 h-5 text-green-600" />
+                    <span className="font-semibold">Duration</span>
+                  </div>
+                  <div className="text-lg font-semibold text-green-600">
+                    {serviceDetails[selectedService.title as keyof typeof serviceDetails].duration}
+                  </div>
+                </div>
+                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <CheckCircle className="w-5 h-5 text-purple-600" />
+                    <span className="font-semibold">What's Included</span>
+                  </div>
+                  <div className="text-lg font-semibold text-purple-600">
+                    {serviceDetails[selectedService.title as keyof typeof serviceDetails].includes.length} Items
+                  </div>
+                </div>
+              </div>
+
+              {/* What's Included */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center space-x-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <span>What's Included</span>
+                </h3>
+                <div className="grid gap-2">
+                  {serviceDetails[selectedService.title as keyof typeof serviceDetails].includes.map((item, index) => (
+                    <div key={index} className="flex items-start space-x-2">
+                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Process */}
+              <div>
+                <h3 className="text-lg font-semibold mb-3 flex items-center space-x-2">
+                  <ArrowRight className="w-5 h-5 text-blue-600" />
+                  <span>Our Process</span>
+                </h3>
+                <div className="space-y-2">
+                  {serviceDetails[selectedService.title as keyof typeof serviceDetails].process.map((step, index) => (
+                    <div key={index} className="flex items-start space-x-2">
+                      <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-xs font-bold text-blue-600">
+                        {index + 1}
+                      </div>
+                      <span className="text-sm">{step}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Why This Price */}
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-2 flex items-center space-x-2">
+                  <TrendingUp className="w-5 h-5 text-yellow-600" />
+                  <span>Why This Price?</span>
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {serviceDetails[selectedService.title as keyof typeof serviceDetails].whyThisPrice}
+                </p>
+              </div>
+
+              {/* CTA */}
+              <div className="flex justify-center">
+                <Button 
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3 text-lg"
+                  onClick={handleContactService}
+                >
+                  Contact Us About This Service
+                </Button>
+              </div>
+              
+              {/* Close Button */}
+              <div className="flex justify-center pt-4">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setIsDialogOpen(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 

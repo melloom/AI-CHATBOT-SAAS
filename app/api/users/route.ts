@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { verifyServerAuth, isServerAdmin, canWrite, getServerUser, updateServerUser, createServerUser, listServerUsers, adminDb } from "@/lib/firebase-admin"
+import { verifyServerAuth, isServerAdmin, canWrite, getServerUser, updateServerUser, createServerUser, listServerUsers, adminDb, notifyAdminsOfPendingUser } from "@/lib/firebase-admin"
 
 export async function GET(request: NextRequest) {
   try {
@@ -98,6 +98,10 @@ export async function POST(request: NextRequest) {
           
           // Create user document
           await createServerUser(userId, userData)
+          // Notify admins if user is pending approval
+          if (userData.approvalStatus === 'pending') {
+            await notifyAdminsOfPendingUser({ ...userData, id: userId })
+          }
           results.push({ userId, success: true })
         } catch (error: any) {
           console.error('Error creating user:', userData.email, error)
@@ -125,6 +129,10 @@ export async function POST(request: NextRequest) {
     }
 
     await createServerUser(userId, data)
+    // Notify admins if user is pending approval
+    if (data.approvalStatus === 'pending') {
+      await notifyAdminsOfPendingUser({ ...data, id: userId })
+    }
     return NextResponse.json({ success: true, userId })
   } catch (error: any) {
     console.error("Error creating user:", error)

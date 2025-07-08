@@ -12,10 +12,13 @@ import {
   MessageCircle,
   ArrowRight,
   ArrowLeft,
-  Globe
+  Globe,
+  Building2,
+  User,
+  UserPlus
 } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 interface WebBuildingNavigationProps {
   activeSection?: string
@@ -24,6 +27,7 @@ interface WebBuildingNavigationProps {
 
 export function WebBuildingNavigation({ activeSection, setActiveSection }: WebBuildingNavigationProps) {
   const pathname = usePathname()
+  const router = useRouter()
 
   const navigationItems = [
     { 
@@ -70,16 +74,18 @@ export function WebBuildingNavigation({ activeSection, setActiveSection }: WebBu
     },
   ]
 
-  const handleSectionClick = (sectionId: string) => {
+  const handleSectionClick = (sectionId: string, href: string) => {
     if (setActiveSection) {
       setActiveSection(sectionId)
+    } else {
+      router.push(href)
     }
   }
 
   return (
     <nav className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex flex-wrap items-center justify-between h-16 gap-x-2">
           {/* Logo/Brand */}
           <div className="flex items-center">
             <Link href="/web-building/home" className="flex items-center space-x-2">
@@ -90,16 +96,16 @@ export function WebBuildingNavigation({ activeSection, setActiveSection }: WebBu
             </Link>
           </div>
 
-          {/* Navigation Items */}
-          <div className="hidden md:flex items-center space-x-1">
+          {/* Navigation Items (desktop) */}
+          <div className="hidden md:flex items-center gap-x-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-slate-700 max-w-full flex-1">
             {navigationItems.map((item) => {
               const isActive = activeSection ? activeSection === item.id : pathname === item.href
               return (
                 <Button
                   key={item.id}
                   variant={isActive ? "default" : "ghost"}
-                  onClick={() => handleSectionClick(item.id)}
-                  className={`relative group ${
+                  onClick={() => handleSectionClick(item.id, item.href)}
+                  className={`relative group whitespace-nowrap ${
                     isActive 
                       ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white" 
                       : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800"
@@ -115,6 +121,27 @@ export function WebBuildingNavigation({ activeSection, setActiveSection }: WebBu
             })}
           </div>
 
+          {/* Theme Toggle and Auth Buttons - Far Right (desktop) */}
+          <div className="hidden md:flex items-center space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.location.href = '/signup?redirect=webvault'}
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Register
+            </Button>
+            <Button 
+              size="sm"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              onClick={() => window.location.href = '/login?redirect=webvault'}
+            >
+              <User className="w-4 h-4 mr-2" />
+              Login
+            </Button>
+            <ThemeToggle />
+          </div>
+
           {/* Mobile Menu Button and Theme Toggle */}
           <div className="md:hidden flex items-center space-x-2">
             <Button variant="ghost" size="sm">
@@ -123,10 +150,6 @@ export function WebBuildingNavigation({ activeSection, setActiveSection }: WebBu
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </Button>
-          </div>
-
-          {/* Theme Toggle and Change Preference - Far Right */}
-          <div className="flex items-center space-x-2">
             <ThemeToggle />
           </div>
         </div>
@@ -135,13 +158,12 @@ export function WebBuildingNavigation({ activeSection, setActiveSection }: WebBu
       {/* Mobile Navigation */}
       <div className="md:hidden border-t border-gray-200 dark:border-slate-700">
         <div className="px-2 pt-2 pb-3 space-y-1">
-          
           {navigationItems.map((item) => {
             const isActive = activeSection ? activeSection === item.id : pathname === item.href
             return (
               <div 
                 key={item.id} 
-                onClick={() => handleSectionClick(item.id)}
+                onClick={() => handleSectionClick(item.id, item.href)}
                 className={`block px-3 py-2 rounded-md text-sm font-medium cursor-pointer ${
                   isActive 
                     ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white" 
@@ -155,6 +177,25 @@ export function WebBuildingNavigation({ activeSection, setActiveSection }: WebBu
               </div>
             )
           })}
+          {/* Auth Buttons (mobile) */}
+          <div className="flex flex-col gap-2 mt-4">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.location.href = '/signup?redirect=webvault'}
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
+              Register
+            </Button>
+            <Button 
+              size="sm"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              onClick={() => window.location.href = '/login?redirect=webvault'}
+            >
+              <User className="w-4 h-4 mr-2" />
+              Login
+            </Button>
+          </div>
         </div>
       </div>
     </nav>

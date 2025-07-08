@@ -135,7 +135,16 @@ export function SystemAnnouncement({ className = "" }: SystemAnnouncementProps) 
 
   // Don't show if not visible or no announcement
   if (!isVisible || !announcement) {
-    return null
+    return (
+      <div className={`mb-4 ${className}`}>
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            No announcements at this time. Check back later for updates!
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
   }
 
   // Check if user has dismissed this announcement

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from './use-auth'
+import { useImpersonation } from "@/components/providers/impersonation-provider"
+import { getUserConversations } from "@/lib/firebase"
 
 export interface AnalyticsData {
   users: {
@@ -178,4 +180,81 @@ export function useAnalyticsData(type: 'overview' | 'user-growth' | 'chatbot-usa
   }, [user, type, timeRange])
 
   return { data, loading, error, refetch: fetchData }
+}
+
+export function useDashboardAnalytics() {
+  const [conversations, setConversations] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const { impersonatedCompany } = useImpersonation()
+
+  useEffect(() => {
+    const loadConversations = async () => {
+      try {
+        setLoading(true)
+        
+        // Load real conversations from Firebase
+        const userConversations = await getUserConversations()
+        setConversations(userConversations)
+      } catch (error) {
+        console.error("Error loading conversations:", error)
+        // Fallback to empty array on error
+        setConversations([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadConversations()
+  }, [impersonatedCompany])
+
+  const getSuccessRate = () => {
+    if (conversations.length === 0) return 0
+    
+    const successfulConversations = conversations.filter(conversation => 
+      conversation.status === 'completed' || conversation.resolved === true
+    )
+    
+    return Math.round((successfulConversations.length / conversations.length) * 100)
+  }
+
+  const getTodayConversations = () => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    return conversations.filter(conversation => {
+      const conversationDate = new Date(conversation.createdAt)
+      return conversationDate >= today
+    })
+  }
+
+  const getYesterdayConversations = () => {
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+    yesterday.setHours(0, 0, 0, 0)
+    
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    return conversations.filter(conversation => {
+      const conversationDate = new Date(conversation.createdAt)
+      return conversationDate >= yesterday && conversationDate < today
+    })
+  }
+
+  const getConversationGrowth = () => {
+    const todayCount = getTodayConversations().length
+    const yesterdayCount = getYesterdayConversations().length
+    
+    if (yesterdayCount === 0) return todayCount > 0 ? 100 : 0
+    return Math.round(((todayCount - yesterdayCount) / yesterdayCount) * 100)
+  }
+
+  return {
+    conversations,
+    loading,
+    getSuccessRate,
+    getTodayConversations,
+    getYesterdayConversations,
+    getConversationGrowth,
+  }
 } 

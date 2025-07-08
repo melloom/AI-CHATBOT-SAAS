@@ -8,13 +8,7 @@ service cloud.firestore {
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
     
-    // Helper function to check if user is read-only admin
-    function isReadOnlyAdmin() {
-      return request.auth != null && 
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isReadOnly == true;
-    }
+
     
     // Helper function to check if user can write (admin but not read-only)
     function canWrite() {
@@ -28,6 +22,20 @@ service cloud.firestore {
     function belongsToCompany(companyId) {
       return request.auth != null && 
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.companyId == companyId;
+    }
+    
+
+    
+    // Helper function to check if user is personal AI account
+    function isPersonalAIAccount() {
+      return request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.accountType == 'personal';
+    }
+    
+    // Helper function to check if user is WebVault account
+    function hasWebVaultAccess() {
+      return request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.platforms.webvault.access == true;
     }
     
     // USERS
@@ -99,6 +107,80 @@ service cloud.firestore {
       // Admins can read all subscriptions, but only non-read-only admins can write
       allow read: if isAdmin();
       allow write: if isAdmin();
+    }
+    
+    // WEBSITE REQUESTS - New collection for website development requests
+    match /websiteRequests/{requestId} {
+      // Allow anyone to create website requests (for public form submissions)
+      allow create: if true;
+      // Users can read/write their own website requests
+      allow read, write: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || resource.data.submittedBy == request.auth.uid);
+      // WebVault users can read all requests (for service providers)
+      allow read: if hasWebVaultAccess();
+      // Admins can read/write all website requests
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // WEBSITES - New collection for managed websites
+    match /websites/{websiteId} {
+      // Users can read/write their own websites
+      allow read, write: if request.auth != null && 
+        resource.data.ownerId == request.auth.uid;
+      // Company members can read/write their company's websites
+      allow read, write: if request.auth != null && 
+        belongsToCompany(resource.data.companyId);
+      // WebVault users can read all websites (for service providers)
+      allow read: if hasWebVaultAccess();
+      // Admins can read/write all websites
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // SERVICES - New collection for web development services
+    match /services/{serviceId} {
+      // Users can read/write their own services
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Company members can read/write their company's services
+      allow read, write: if request.auth != null && 
+        belongsToCompany(resource.data.companyId);
+      // WebVault users can read all services
+      allow read: if hasWebVaultAccess();
+      // Admins can read/write all services
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // PERSONAL AI ASSISTANTS - New collection for personal AI data
+    match /personalAI/{assistantId} {
+      // Users can read/write their own personal AI assistants
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Personal AI account users can read/write their assistants
+      allow read, write: if isPersonalAIAccount();
+      // Admins can read/write all personal AI assistants
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // PERSONAL AI INTERACTIONS - New collection for personal AI interaction logs
+    match /personalAIInteractions/{interactionId} {
+      // Users can read/write their own interactions
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Personal AI account users can read/write their interactions
+      allow read, write: if isPersonalAIAccount();
+      // Admins can read all interactions
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // RATE LIMITS - New collection for API rate limiting
+    match /rateLimits/{ipAddress} {
+      // Only admins can read/write rate limit data
+      allow read, write: if isAdmin();
     }
     
     // ANALYTICS - Only admins can access analytics data
@@ -214,6 +296,59 @@ service cloud.firestore {
     
     // ERROR LOGS - Only admins can access
     match /errorLogs/{document} {
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // CONSULTATION REQUESTS - New collection for consultation bookings
+    match /consultationRequests/{requestId} {
+      // Users can read/write their own consultation requests
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Company members can read/write their company's consultation requests
+      allow read, write: if request.auth != null && 
+        belongsToCompany(resource.data.companyId);
+      // Admins can read/write all consultation requests
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // CHATBOT ANALYTICS - Platform-specific analytics
+    match /chatbotAnalytics/{document} {
+      // Users can read their own chatbot analytics
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Company members can read their company's chatbot analytics
+      allow read: if request.auth != null && 
+        belongsToCompany(resource.data.companyId);
+      // Admins can read all chatbot analytics
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // WEBVAULT ANALYTICS - Platform-specific analytics
+    match /webvaultAnalytics/{document} {
+      // Users can read their own webvault analytics
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Company members can read their company's webvault analytics
+      allow read: if request.auth != null && 
+        belongsToCompany(resource.data.companyId);
+      // WebVault users can read all webvault analytics
+      allow read: if hasWebVaultAccess();
+      // Admins can read all webvault analytics
+      allow read: if isAdmin();
+      allow write: if canWrite();
+    }
+    
+    // PERSONAL AI ANALYTICS - Platform-specific analytics
+    match /personalAIAnalytics/{document} {
+      // Users can read their own personal AI analytics
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Personal AI account users can read their analytics
+      allow read: if isPersonalAIAccount();
+      // Admins can read all personal AI analytics
       allow read: if isAdmin();
       allow write: if canWrite();
     }

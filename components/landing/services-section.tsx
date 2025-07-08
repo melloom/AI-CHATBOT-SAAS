@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -98,13 +99,15 @@ export function ServicesSection() {
               </div>
             </div>
             <div className="mt-6 pt-6 border-t">
-              <Button 
-                size="lg" 
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                <Calendar className="mr-2 h-5 w-5" />
-                Book Free Consultation
-              </Button>
+              <Link href="/contact">
+                <Button 
+                  size="lg" 
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                >
+                  <Calendar className="mr-2 h-5 w-5" />
+                  Book Free Consultation
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

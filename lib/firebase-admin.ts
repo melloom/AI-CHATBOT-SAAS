@@ -240,4 +240,16 @@ export const sendNotificationToAllAdmins = async (notificationData: {
     console.error('Error sending notification to admin users:', error)
     throw error
   }
+}
+
+export const notifyAdminsOfPendingUser = async (userData: any) => {
+  return sendNotificationToAllAdmins({
+    title: 'New User Pending Approval',
+    message: `A new user (${userData.email || userData.displayName || 'Unknown'}) is awaiting approval.`,
+    type: 'warning',
+    priority: 'high',
+    actionUrl: '/dashboard/admin/approvals',
+    actionText: 'Review Approvals',
+    metadata: { userId: userData.id, email: userData.email, displayName: userData.displayName }
+  })
 } 
