@@ -390,7 +390,7 @@ export function AppSidebar() {
     canEdit
   } = useImpersonation()
   
-  // Platform switching state
+  // Platform switching state with localStorage persistence
   const [activePlatform, setActivePlatform] = useState<string>('chathub')
 
   // Determine available platforms for the user (only show active/approved platforms)
@@ -400,12 +400,53 @@ export function AppSidebar() {
     return platformData?.access && platformData?.subscription?.status === 'active'
   })
   
-  // Set initial active platform based on available platforms
+  // Set initial active platform based on available platforms and localStorage
   useEffect(() => {
-    if (availablePlatforms.length > 0 && !availablePlatforms.includes(activePlatform)) {
-      setActivePlatform(availablePlatforms[0])
+    if (availablePlatforms.length > 0) {
+      // Try to get the last active platform from localStorage
+      const lastActivePlatform = typeof window !== 'undefined' ? localStorage.getItem('activePlatform') : null
+      
+      // If we have a stored platform and it's still available, use it
+      if (lastActivePlatform && availablePlatforms.includes(lastActivePlatform)) {
+        setActivePlatform(lastActivePlatform)
+        console.log(`Restored active platform from localStorage: ${lastActivePlatform}`)
+      } else if (!availablePlatforms.includes(activePlatform)) {
+        // If current active platform is not available, switch to first available
+        const firstAvailable = availablePlatforms[0]
+        setActivePlatform(firstAvailable)
+        console.log(`Switched to first available platform: ${firstAvailable}`)
+      }
     }
   }, [availablePlatforms, activePlatform])
+
+  // Clear localStorage when user changes (different account)
+  useEffect(() => {
+    if (profile?.email) {
+      const storedUser = typeof window !== 'undefined' ? localStorage.getItem('lastUserEmail') : null
+      if (storedUser && storedUser !== profile.email) {
+        // Different user, clear platform preference
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('activePlatform')
+          localStorage.setItem('lastUserEmail', profile.email)
+          console.log('User changed, cleared platform preference')
+        }
+      } else if (!storedUser) {
+        // First time, store current user
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('lastUserEmail', profile.email)
+        }
+      }
+    }
+  }, [profile?.email])
+
+  // Persist active platform changes to localStorage
+  const handlePlatformChange = (platform: string) => {
+    setActivePlatform(platform)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('activePlatform', platform)
+      console.log(`Platform changed and persisted: ${platform}`)
+    }
+  }
 
   // Determine menu items based on account type and platform access
   const getMenuItems = () => {
@@ -458,6 +499,12 @@ export function AppSidebar() {
 
   const handleSignOut = async () => {
     try {
+      // Clear platform preference from localStorage on sign out
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('activePlatform')
+        localStorage.removeItem('lastUserEmail')
+        console.log('Cleared platform preferences from localStorage on sign out')
+      }
       await signOut()
       router.push("/")
     } catch (error) {
@@ -584,7 +631,7 @@ export function AppSidebar() {
                 {availablePlatforms.map((platform) => (
                   <button
                     key={platform}
-                    onClick={() => setActivePlatform(platform)}
+                    onClick={() => handlePlatformChange(platform)}
                     className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm transition-colors ${
                       activePlatform === platform
                         ? 'bg-primary text-primary-foreground'

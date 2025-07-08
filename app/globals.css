@@ -68,6 +68,43 @@
   }
 }
 
+/* Mobile-specific fixes */
+@media (max-width: 768px) {
+  /* Prevent horizontal scrolling */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Ensure proper touch targets */
+  button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Fix navigation z-index issues */
+  nav, header {
+    z-index: 50;
+  }
+  
+  /* Prevent text overflow */
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  /* Ensure proper spacing on mobile */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Fix glass effects on mobile */
+  .glass-dark, .glass-card {
+    backdrop-filter: blur(10px);
+  }
+}
+
 /* High-resolution dark mode backgrounds */
 .dark .dark-bg-gradient {
   background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
@@ -206,7 +243,7 @@
   }
 }
 
-/* Glass morphism effect */
+/* Glass morphism effects */
 .glass {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
@@ -230,12 +267,11 @@
   }
 }
 
-/* Pulse animation for stats */
+/* Blob animation */
 .pulse-slow {
-  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: blob 7s infinite;
 }
 
-/* Blob animation for background elements */
 @keyframes blob {
   0% {
     transform: translate(0px, 0px) scale(1);

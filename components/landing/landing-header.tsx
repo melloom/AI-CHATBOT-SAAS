@@ -14,8 +14,8 @@ export function LandingHeader() {
   const signInLink = pathname === "/chathub" ? "/" : "/login"
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 glass-dark">
-      <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center space-x-2">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
           <Image 
             src="/LOGO.png" 
             alt="BuildFlow Logo" 
@@ -24,7 +24,7 @@ export function LandingHeader() {
             className="h-6 w-6"
             priority
           />
-          <span className="font-bold text-xl dark:text-white">BuildFlow</span>
+          <span className="font-bold text-lg sm:text-xl dark:text-white">BuildFlow</span>
         </Link>
 
         <nav className="hidden md:flex items-center space-x-6">
@@ -42,13 +42,17 @@ export function LandingHeader() {
           </Link>
         </nav>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           <ThemeToggle />
-          <Link href={signInLink}>
-            <Button variant="ghost" className="bg-purple-600/20 hover:bg-purple-600/40 text-purple-700 dark:text-purple-300">Sign In</Button>
+          <Link href="/login">
+            <Button size="sm" className="hidden sm:inline-flex">
+              Sign In
+            </Button>
           </Link>
           <Link href="/signup">
-            <Button className="glow-primary">Get Started</Button>
+            <Button size="sm" className="bg-primary hover:bg-primary/90">
+              Get Started
+            </Button>
           </Link>
         </div>
       </div>

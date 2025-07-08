@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
@@ -15,7 +16,9 @@ import {
   Globe,
   Building2,
   User,
-  UserPlus
+  UserPlus,
+  Menu,
+  X
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -28,6 +31,7 @@ interface WebBuildingNavigationProps {
 export function WebBuildingNavigation({ activeSection, setActiveSection }: WebBuildingNavigationProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const navigationItems = [
     { 
@@ -80,6 +84,12 @@ export function WebBuildingNavigation({ activeSection, setActiveSection }: WebBu
     } else {
       router.push(href)
     }
+    // Close mobile menu after clicking
+    setIsMobileMenuOpen(false)
+  }
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen)
   }
 
   return (
@@ -144,60 +154,71 @@ export function WebBuildingNavigation({ activeSection, setActiveSection }: WebBu
 
           {/* Mobile Menu Button and Theme Toggle */}
           <div className="md:hidden flex items-center space-x-2">
-            <Button variant="ghost" size="sm">
-              <span className="sr-only">Open menu</span>
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={toggleMobileMenu}
+              className="p-2"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+              <span className="sr-only">Toggle menu</span>
             </Button>
             <ThemeToggle />
           </div>
         </div>
       </div>
 
-      {/* Mobile Navigation */}
-      <div className="md:hidden border-t border-gray-200 dark:border-slate-700">
-        <div className="px-2 pt-2 pb-3 space-y-1">
-          {navigationItems.map((item) => {
-            const isActive = activeSection ? activeSection === item.id : pathname === item.href
-            return (
-              <div 
-                key={item.id} 
-                onClick={() => handleSectionClick(item.id, item.href)}
-                className={`block px-3 py-2 rounded-md text-sm font-medium cursor-pointer ${
-                  isActive 
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white" 
-                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800"
-                }`}>
-                <div className="flex items-center">
-                  <item.icon className="w-4 h-4 mr-2" />
-                  {item.label}
+      {/* Mobile Navigation - Hidden by default, shown when menu is open */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            {navigationItems.map((item) => {
+              const isActive = activeSection ? activeSection === item.id : pathname === item.href
+              return (
+                <div 
+                  key={item.id} 
+                  onClick={() => handleSectionClick(item.id, item.href)}
+                  className={`block px-3 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors ${
+                    isActive 
+                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white" 
+                      : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800"
+                  }`}>
+                  <div className="flex items-center">
+                    <item.icon className="w-4 h-4 mr-2" />
+                    {item.label}
+                  </div>
+                  <div className="text-xs opacity-75 ml-6">{item.description}</div>
                 </div>
-                <div className="text-xs opacity-75 ml-6">{item.description}</div>
-              </div>
-            )
-          })}
-          {/* Auth Buttons (mobile) */}
-          <div className="flex flex-col gap-2 mt-4">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => window.location.href = '/signup?redirect=webvault'}
-            >
-              <UserPlus className="w-4 h-4 mr-2" />
-              Register
-            </Button>
-            <Button 
-              size="sm"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              onClick={() => window.location.href = '/login?redirect=webvault'}
-            >
-              <User className="w-4 h-4 mr-2" />
-              Login
-            </Button>
+              )
+            })}
+            
+            {/* Auth Buttons (mobile) */}
+            <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.location.href = '/signup?redirect=webvault'}
+                className="w-full"
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Register
+              </Button>
+              <Button 
+                size="sm"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                onClick={() => window.location.href = '/login?redirect=webvault'}
+              >
+                <User className="w-4 h-4 mr-2" />
+                Login
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </nav>
   )
 } 

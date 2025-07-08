@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { getUserNotifications, createNotification, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification, clearAllNotifications } from "@/lib/firebase"
 import { notificationService } from "@/lib/notifications"
-import { onSnapshot, query, collection, where, orderBy, limit, or, getDocs } from "firebase/firestore"
+import { onSnapshot, query, collection, where, orderBy, limit, getDocs } from "firebase/firestore"
 import { db, auth } from "@/lib/firebase"
 import { registerBackgroundRefresh, unregisterBackgroundRefresh } from "@/lib/background-refresh"
 
@@ -28,30 +28,17 @@ export function useNotifications() {
           isAdmin = userDoc.docs[0].data().isAdmin === true
         }
       } catch (e) {
-        // fallback: not admin
+        console.log("Could not check admin status, defaulting to regular user")
       }
 
-      let notificationsQuery
-      if (isAdmin) {
-        // Admin: fetch own notifications and those with target: 'admin' or type: 'system'
-        notificationsQuery = query(
-          collection(db, "notifications"),
-          or(
-            where("userId", "==", user.uid),
-            where("target", "==", "admin"),
-            where("type", "==", "system")
-          ),
-          orderBy("createdAt", "desc"),
-          limit(30)
-        )
-      } else {
-        notificationsQuery = query(
-          collection(db, "notifications"),
-          where("userId", "==", user.uid),
-          orderBy("createdAt", "desc"),
-          limit(20)
-        )
-      }
+      // Simplified query - just get user's own notifications
+      // Admin users will get additional notifications through the backend
+      const notificationsQuery = query(
+        collection(db, "notifications"),
+        where("userId", "==", user.uid),
+        orderBy("createdAt", "desc"),
+        limit(20)
+      )
 
       const unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
         const userNotifications = snapshot.docs.map(doc => ({
@@ -63,6 +50,7 @@ export function useNotifications() {
         setLoading(false)
       }, (error) => {
         console.error("Error listening to notifications:", error)
+        // Don't throw error, just set loading to false
         setLoading(false)
       })
 

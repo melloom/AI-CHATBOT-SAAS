@@ -46,40 +46,42 @@ export function AppHeader() {
     : (impersonatedCompany?.companyName || profile?.companyName || user?.displayName)
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 glass-dark">
-      <SidebarTrigger className="-ml-1" />
+    <header className="flex h-16 shrink-0 items-center gap-2 border-b px-2 sm:px-4 glass-dark min-w-0">
+      <SidebarTrigger className="-ml-1 flex-shrink-0" />
 
-      <div className="flex-1" />
+      <div className="flex-1 min-w-0" />
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
         <ThemeToggle />
         
         <NotificationBell />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full glass-dark">
+            <Button variant="ghost" className="relative h-8 w-8 rounded-full glass-dark flex-shrink-0">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user?.photoURL || ""} alt={user?.displayName || ""} />
-                <AvatarFallback>{user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                <AvatarFallback className="text-xs">
+                  {user?.displayName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 glass-card" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{displayCompanyName}</p>
-                <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                <p className="text-sm font-medium leading-none truncate">{displayCompanyName}</p>
+                <p className="text-xs leading-none text-muted-foreground truncate">{user?.email}</p>
                 {isImpersonating && (
-                  <div className="flex items-center space-x-2 mt-1">
-                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  <div className="flex flex-col space-y-1 mt-1">
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium inline-flex ${
                       impersonationMode === 'edit' 
                         ? 'bg-yellow-500/20 text-yellow-600 border border-yellow-500/30' 
                         : 'bg-blue-500/20 text-blue-600 border border-blue-500/30'
                     }`}>
                       {impersonationMode === 'edit' ? 'Edit Mode' : 'View Mode'}
                     </div>
-                    <span className="text-xs leading-none text-yellow-600">
+                    <span className="text-xs leading-none text-yellow-600 truncate">
                       Impersonating: {impersonatedCompany.companyName}
                     </span>
                   </div>

@@ -98,9 +98,11 @@ export default function DashboardLayout({
         <AppSidebar />
         <SidebarInset className="ml-0">
           <AppHeader />
-          <main className="flex-1 p-6 dark-bg-cosmic overflow-x-auto min-w-0 w-full">
+          <main className="flex-1 p-3 sm:p-6 dark-bg-cosmic overflow-x-auto min-w-0 w-full max-w-full">
             <SystemAnnouncement />
-            {children}
+            <div className="w-full max-w-full overflow-x-hidden">
+              {children}
+            </div>
           </main>
         </SidebarInset>
       </SidebarProvider>
